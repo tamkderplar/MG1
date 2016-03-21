@@ -3,6 +3,7 @@
 
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
+#include <QColor>
 
 #include "torus.h"
 
@@ -17,6 +18,7 @@ public:
     bool initBuffers(int nR, int nr);
     void write(QVector<glm::vec4> points,QVector<glm::ivec2> edges);
     void draw(glm::mat4 transform,glm::mat4 perspective,float);
+    void setColor(QColor c);
 private:
     QOpenGLShaderProgram m_shader;
     QOpenGLBuffer m_vertexBuffer;
@@ -26,6 +28,7 @@ private:
     static QString VSH;
     static QString GSH;
     static QString FSH;
+    QColor color;
 
 };
 

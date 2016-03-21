@@ -76,3 +76,9 @@ void MainWindow::on_rSpinBox_valueChanged(double arg1)
     findChild<SceneGLWidget*>()->updateTorus();
     findChild<SceneGLWidget*>()->update();
 }
+
+void MainWindow::on_stereoCheckBox_clicked(bool checked)
+{
+    findChild<SceneGLWidget*>()->stereo = checked;
+    findChild<SceneGLWidget*>()->update();
+}

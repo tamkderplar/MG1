@@ -22,6 +22,8 @@ public:
     Torus torus;
     //shader things
     FullShader torusShader;
+    //
+    bool stereo;
     void setMouseMode(std::function<glm::mat4(glm::mat4,glm::vec3)>);
 
 protected:

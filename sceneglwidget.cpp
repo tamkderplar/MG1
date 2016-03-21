@@ -5,6 +5,7 @@
 SceneGLWidget::SceneGLWidget(QWidget *parent)
     :QGLWidget(parent)
     ,torus()
+    ,stereo(false)
 {
     cameraPosZ = 2.0f;
     perspMat[2][2] = 0;
@@ -36,11 +37,14 @@ void SceneGLWidget::initializeGL()
 
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 
-    glEnable(GL_PROGRAM_POINT_SIZE);
+    //glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    //glEnable(GL_DEPTH_TEST);
+    //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    //glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+    //glBlendFunc(GL_ONE,GL_ONE);
+    glBlendEquation(GL_MAX);
 
     {
         uint vao;
@@ -77,15 +81,27 @@ void SceneGLWidget::resizeGL(int w, int h)
 void SceneGLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glm::mat4 viewportMat = glm::mat4(1.0f);
+    viewportMat[0][0] = sizes[1]/sizes[3];
+    viewportMat[1][1] = sizes[0]/sizes[3];
 
     //
     torusShader.bind();
     //draw
-    glm::mat4 viewportMat = glm::mat4(1.0f);
-    viewportMat[0][0] = sizes[1]/sizes[3];
-    viewportMat[1][1] = sizes[0]/sizes[3];
-    //glm::mat4 fullMat = perspMat*viewportMat*worldMat;
-    torusShader.draw(worldMat,perspMat*viewportMat,cameraPosZ);
+    if(stereo){
+        float eyeWidth = 0.01;
+        glm::mat4 perspL = perspMat;
+        perspL[2][0] =  eyeWidth/cameraPosZ;
+        torusShader.setColor(qRgba(150,  0,  0,255));
+        torusShader.draw(worldMat,perspL*viewportMat,cameraPosZ);
+        glm::mat4 perspR = perspMat;
+        perspR[2][0] = -eyeWidth/cameraPosZ;
+        torusShader.setColor(qRgba(  0,  0,255,255));
+        torusShader.draw(worldMat,perspR*viewportMat,cameraPosZ);
+    }else{
+        torusShader.setColor(qRgba(255,255,255,100));
+        torusShader.draw(worldMat,perspMat*viewportMat,cameraPosZ);
+    }
     //
     torusShader.release();
     qWarning() << worldMat[0][0];

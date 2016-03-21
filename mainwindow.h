@@ -26,6 +26,8 @@ private slots:
 
     void on_rSpinBox_valueChanged(double arg1);
 
+    void on_stereoCheckBox_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
 };

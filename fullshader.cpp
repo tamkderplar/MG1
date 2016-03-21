@@ -4,6 +4,7 @@
 FullShader::FullShader()
     :m_vertexBuffer(QOpenGLBuffer::VertexBuffer)
     ,m_indexBuffer(QOpenGLBuffer::IndexBuffer)
+    ,color(qRgba(255,255,255,100))
 {
 
 }
@@ -92,6 +93,7 @@ void FullShader::draw(glm::mat4 transform,glm::mat4 perspective,float cameraPosZ
     m_indexBuffer.bind();
     m_shader.setUniformValue("transform",*(parr44)&transform);
     m_shader.setUniformValue("perspective",*(parr44)&perspective);
+    m_shader.setUniformValue("color",color);
     m_shader.setUniformValue("cameraPosZ",cameraPosZ);
     m_shader.setAttributeBuffer("vertex", GL_FLOAT, 0, 4, 4*sizeof(float));
     m_shader.enableAttributeArray("vertex");
@@ -99,6 +101,11 @@ void FullShader::draw(glm::mat4 transform,glm::mat4 perspective,float cameraPosZ
     glDrawElements(GL_LINES, 2*m_indexCount ,GL_UNSIGNED_INT,0);
     m_vertexBuffer.release();
     m_indexBuffer.release();
+}
+
+void FullShader::setColor(QColor c)
+{
+    color = c;
 }
 
 
@@ -158,9 +165,10 @@ QString FullShader::GSH = GLSL(330,
 );
 QString FullShader::FSH = GLSL(330,
     layout(location = 0, index = 0) out vec4 fragColor;
+    uniform vec4 color;
     void main (void)
     {
-        fragColor = vec4(1,1,1 ,0.7);
+        fragColor = color;
     }
 );
 
