@@ -101,6 +101,24 @@ void SceneGLWidget::addPoint(glm::vec3 p)
     numbering++;
 }
 
+void SceneGLWidget::removePoint(QString name)
+{
+    for(int i=0;i<points.size();++i){
+        if(0 == points[i].name.compare(name)){
+            points.removeAt(i);
+            emit pointRemoved(name);
+            return;
+        }
+    }
+}
+
+void SceneGLWidget::removePointAt(int id)
+{
+    QString name = points[id].name;
+    points.removeAt(id);
+    emit pointRemoved(name);
+}
+
 void SceneGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();

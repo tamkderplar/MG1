@@ -32,7 +32,8 @@ public:
     bool stereo;
     void setMouseMode(int mode);
     void addPoint(glm::vec3);
-    void removePoint(PointCAM*);
+    void removePoint(QString name);
+    void removePointAt(int id);
 
 protected:
     virtual void initializeGL();
@@ -54,6 +55,7 @@ private:
 
 signals:
     void pointAdded(QString name);
+    void pointRemoved(QString name);
 
 public slots:
 

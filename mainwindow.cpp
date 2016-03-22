@@ -66,3 +66,11 @@ void MainWindow::on_widgetScene_pointAdded(const QString &name)
 {
     findChild<QListWidget*>()->addItem(name);
 }
+
+void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+    findChild<SceneGLWidget*>()->removePoint(item->text());
+    findChild<QListWidget*>()->takeItem(findChild<QListWidget*>()->row(item));
+    delete item;
+    findChild<SceneGLWidget*>()->update();
+}

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +30,8 @@ private slots:
     void on_stereoCheckBox_clicked(bool checked);
 
     void on_widgetScene_pointAdded(const QString &);
+
+    void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;
