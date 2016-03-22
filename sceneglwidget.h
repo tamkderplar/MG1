@@ -9,6 +9,7 @@
 
 #include "torus.h"
 #include "fullshader.h"
+#include "pointcam.h"
 
 class SceneGLWidget : public QGLWidget, protected QOpenGLFunctions_3_3_Core
 {
@@ -17,14 +18,21 @@ public:
     explicit SceneGLWidget(QWidget *parent = 0);
 
     void updateTorus();
+    void updatePoints();
+    void updateCursor();
 
     glm::mat4 worldMat,perspMat;
     Torus torus;
+    QList<PointCAM> points;
     //shader things
     FullShader torusShader;
+    FullShader pointsShader;
+    FullShader cursorShader;
     //
     bool stereo;
-    void setMouseMode(std::function<glm::mat4(glm::mat4,glm::vec3)>);
+    void setMouseMode(int mode);
+    void addPoint(glm::vec3);
+    void removePoint(PointCAM*);
 
 protected:
     virtual void initializeGL();
@@ -32,25 +40,20 @@ protected:
     virtual void paintGL();
 
 private:
-    std::function<glm::mat4(glm::mat4,glm::vec3)> mouseFunc;
+    std::function<void(glm::vec3)> mouseFunc;
     void mousePressEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent*e);
 
+    void drawScene(glm::mat4 transform,QColor c);
+
     QPoint lastpos;
     float sizes[4];
     float cameraPosZ;
+    glm::vec4 cursorPos;
 
-
-/*
-    QOpenGLShaderProgram m_shader;
-    QOpenGLBuffer m_vertexBuffer;
-    QOpenGLBuffer m_indexBuffer;
-    static QString VSH;
-    static QString GSH;
-    static QString FSH;
-*/
 signals:
+    void pointAdded(QString name);
 
 public slots:
 

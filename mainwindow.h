@@ -28,6 +28,8 @@ private slots:
 
     void on_stereoCheckBox_clicked(bool checked);
 
+    void on_widgetScene_pointAdded(const QString &);
+
 private:
     Ui::MainWindow *ui;
 };

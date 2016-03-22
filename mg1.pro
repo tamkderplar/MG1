@@ -18,12 +18,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     sceneglwidget.cpp \
     torus.cpp \
-    fullshader.cpp
+    fullshader.cpp \
+    pointcam.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
     torus.h \
     glm.h \
-    fullshader.h
+    fullshader.h \
+    pointcam.h
 
 FORMS    += mainwindow.ui

@@ -6,16 +6,12 @@ SceneGLWidget::SceneGLWidget(QWidget *parent)
     :QGLWidget(parent)
     ,torus()
     ,stereo(false)
+    ,cursorPos(0,0,0,1)
 {
     cameraPosZ = 2.0f;
     perspMat[2][2] = 0;
     perspMat[2][3] = -1/cameraPosZ;
-    mouseFunc = [](glm::mat4 m,glm::vec3 dir){
-        m=glm::rotate((dir.x)/400.0f,glm::vec3{0,1,0})*m;
-        m=glm::rotate((dir.y)/400.0f,glm::vec3{1,0,0})*m;
-        m=glm::rotate((dir.z)/400.0f,glm::vec3{0,0,1})*m;
-        return m;
-    };
+    setMouseMode(0);
 }
 
 void SceneGLWidget::updateTorus()
@@ -23,9 +19,86 @@ void SceneGLWidget::updateTorus()
     torusShader.write(torus.points,torus.edges);
 }
 
-void SceneGLWidget::setMouseMode(std::function<glm::mat4 (glm::mat4,glm::vec3)> f)
+void SceneGLWidget::updatePoints()
 {
-    mouseFunc = f;
+    QVector<glm::vec4> pointsPoints;
+    for (PointCAM& var : points) {
+        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{ 0.03, 0.03,0,0});
+        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{-0.03,-0.03,0,0});
+        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{-0.03, 0.03,0,0});
+        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{ 0.03,-0.03,0,0});
+    }
+    QVector<glm::ivec2> pointsEdges;
+    for (int i=0;i<points.size();++i) {
+        pointsEdges.append(glm::ivec2{4*i+0,4*i+1});
+        pointsEdges.append(glm::ivec2{4*i+2,4*i+3});
+    }
+    pointsShader.write(pointsPoints,pointsEdges);
+}
+
+void SceneGLWidget::updateCursor()
+{
+    QVector<glm::vec4> cursorPoints;
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,0, 0.1,0});
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,0,-0.1,0});
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0, 0.1,0,0});
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,-0.1,0,0});
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{ 0.1,0,0,0});
+    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{-0.1,0,0,0});
+    QVector<glm::ivec2> cursorEdges;
+    cursorEdges.append(glm::ivec2{0,1});
+    cursorEdges.append(glm::ivec2{2,3});
+    cursorEdges.append(glm::ivec2{4,5});
+    cursorShader.write(cursorPoints,cursorEdges);
+}
+
+void SceneGLWidget::setMouseMode(int mode)
+{
+    switch (mode) {
+    case 0:
+        mouseFunc =
+            [this](glm::vec3 curpos){
+            glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
+            worldMat=glm::rotate((dir.x)/400.0f,glm::vec3{0,1,0})*worldMat;
+            worldMat=glm::rotate((dir.y)/400.0f,glm::vec3{1,0,0})*worldMat;
+            worldMat=glm::rotate((dir.z)/400.0f,glm::vec3{0,0,1})*worldMat;
+        };
+        break;
+    case 1:
+        mouseFunc =
+            [this](glm::vec3 curpos){
+            glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
+            worldMat=glm::translate(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f)*worldMat;
+        };
+        break;
+    case 2:
+        mouseFunc =
+            [this](glm::vec3 curpos){
+            glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
+            float s = exp(dir.x/400.0f);
+            worldMat=glm::scale(glm::vec3{s,s,s})*worldMat;
+        };
+        break;
+    case 3:
+        mouseFunc =
+            [this](glm::vec3 curpos){
+            glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
+            cursorPos += glm::inverse(worldMat)* glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
+        };
+        break;
+    default:
+        break;
+    }
+}
+
+void SceneGLWidget::addPoint(glm::vec3 p)
+{
+    static int numbering = 1;
+    PointCAM point(p);
+    point.name = QString("Point%1").arg(numbering);
+    points.append(point);
+    emit pointAdded(point.name);
+    numbering++;
 }
 
 void SceneGLWidget::initializeGL()
@@ -37,13 +110,7 @@ void SceneGLWidget::initializeGL()
 
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 
-    //glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
-    //glEnable(GL_DEPTH_TEST);
-    //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-    //glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
-    //glBlendFunc(GL_ONE,GL_ONE);
     glBlendEquation(GL_MAX);
 
     {
@@ -67,6 +134,33 @@ void SceneGLWidget::initializeGL()
     //write
     torusShader.write(torus.points,torus.edges);
     torusShader.release();
+
+    cursorShader.prepareShaderProgram();
+    if(!cursorShader.bind()){
+        qWarning() << "Could not bind shProgram";
+        return;
+    }
+    if(!cursorShader.initBuffers(1,3)){
+        qWarning() << "Could not bind or create buffers";
+        return;
+    }
+    //write
+    updateCursor();
+    cursorShader.release();
+
+    pointsShader.prepareShaderProgram();
+    if(!pointsShader.bind()){
+        qWarning() << "Could not bind shProgram";
+        return;
+    }
+    if(!pointsShader.initBuffers(1,3)){
+        qWarning() << "Could not bind or create buffers";
+        return;
+    }
+    //write
+    updatePoints();
+    pointsShader.release();
+
 }
 
 void SceneGLWidget::resizeGL(int w, int h)
@@ -86,24 +180,20 @@ void SceneGLWidget::paintGL()
     viewportMat[1][1] = sizes[0]/sizes[3];
 
     //
-    torusShader.bind();
     //draw
     if(stereo){
         float eyeWidth = 0.01;
-        glm::mat4 perspL = perspMat;
+        glm::mat4 perspL = perspMat, perspR = perspMat;
+
         perspL[2][0] =  eyeWidth/cameraPosZ;
-        torusShader.setColor(qRgba(150,  0,  0,255));
-        torusShader.draw(worldMat,perspL*viewportMat,cameraPosZ);
-        glm::mat4 perspR = perspMat;
+        drawScene(perspL*viewportMat,qRgba(150,  0,  0,255));
+
         perspR[2][0] = -eyeWidth/cameraPosZ;
-        torusShader.setColor(qRgba(  0,  0,255,255));
-        torusShader.draw(worldMat,perspR*viewportMat,cameraPosZ);
+        drawScene(perspR*viewportMat,qRgba(  0,  0,255,255));
     }else{
-        torusShader.setColor(qRgba(255,255,255,100));
-        torusShader.draw(worldMat,perspMat*viewportMat,cameraPosZ);
+        drawScene(perspMat*viewportMat,qRgba(255,255,255,100));
     }
     //
-    torusShader.release();
     qWarning() << worldMat[0][0];
 }
 
@@ -114,17 +204,35 @@ void SceneGLWidget::mousePressEvent(QMouseEvent *e)
 
 void SceneGLWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    //worldMat=glm::rotate(-(lastpos.x()-e->pos().x())/400.0f,glm::vec3{0,1,0})*worldMat;
-    //worldMat=glm::rotate(-(lastpos.y()-e->pos().y())/400.0f,glm::vec3{1,0,0})*worldMat;
     QPoint dir = e->pos()-lastpos;
-    worldMat = mouseFunc(worldMat,{dir.x(),dir.y(),0});
+    mouseFunc({e->pos().x(),e->pos().y(),0});
     lastpos = e->pos();
     update();
 }
 
 void SceneGLWidget::wheelEvent(QWheelEvent *e)
 {
-    worldMat = mouseFunc(worldMat,{0,0,e->angleDelta().y()});
+    mouseFunc({lastpos.x(),lastpos.y(),e->angleDelta().y()});
     lastpos = e->pos();
     update();
+}
+
+void SceneGLWidget::drawScene(glm::mat4 transform, QColor c)
+{
+    torusShader.bind();
+    torusShader.setColor(c);
+    torusShader.draw(worldMat,transform,cameraPosZ);
+    torusShader.release();
+
+    updateCursor();
+    cursorShader.bind();
+    cursorShader.setColor(c);
+    cursorShader.draw(worldMat,transform,cameraPosZ);
+    cursorShader.release();
+
+    updatePoints();
+    pointsShader.bind();
+    pointsShader.setColor(c);
+    pointsShader.draw(worldMat,transform,cameraPosZ);
+    pointsShader.release();
 }

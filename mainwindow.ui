@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>426</height>
+    <width>663</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,16 @@
          <item>
           <property name="text">
            <string>Scale</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Move Cursor</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Grab Point</string>
           </property>
          </item>
         </widget>
@@ -159,7 +169,51 @@
      </widget>
     </item>
     <item>
-     <widget class="SceneGLWidget" name="widget_2" native="true"/>
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="SceneGLWidget" name="widgetScene" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_2" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QListWidget" name="listWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -168,7 +222,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>526</width>
+     <width>663</width>
      <height>22</height>
     </rect>
    </property>
@@ -190,6 +244,9 @@
    <extends>QWidget</extends>
    <header>sceneglwidget.h</header>
    <container>1</container>
+   <slots>
+    <signal>pointAdded(QString)</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>

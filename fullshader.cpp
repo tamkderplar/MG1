@@ -137,6 +137,7 @@ QString FullShader::GSH = GLSL(330,
 
         if (v0.z >= r99 && v1.z >= r99)
             return;
+        /**/
         float t = (r99 - v0.z)/(v1.z - v0.z);
     /**/
         if (v0.z >= r99){
@@ -145,7 +146,6 @@ QString FullShader::GSH = GLSL(330,
             gl_Position = v0;
         }
         gl_Position = perspective*gl_Position;
-        /*gl_Position.z = 0;*/
         gl_Position = gl_Position/gl_Position.w;
         EmitVertex();
     /**/
@@ -155,7 +155,6 @@ QString FullShader::GSH = GLSL(330,
             gl_Position = v1;
         }
         gl_Position = perspective*gl_Position;
-        /*gl_Position.z = 0;*/
         gl_Position = gl_Position/gl_Position.w;
         EmitVertex();
     /**/
