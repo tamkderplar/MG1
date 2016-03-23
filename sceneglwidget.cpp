@@ -7,6 +7,7 @@ SceneGLWidget::SceneGLWidget(QWidget *parent)
     ,torus()
     ,stereo(false)
     ,cursorPos(0,0,0,1)
+    ,grabbed(-1)
 {
     cameraPosZ = 2.0f;
     perspMat[2][2] = 0;
@@ -21,12 +22,13 @@ void SceneGLWidget::updateTorus()
 
 void SceneGLWidget::updatePoints()
 {
+    glm::mat4 invWorld = glm::inverse(worldMat);
     QVector<glm::vec4> pointsPoints;
     for (PointCAM& var : points) {
-        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{ 0.03, 0.03,0,0});
-        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{-0.03,-0.03,0,0});
-        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{-0.03, 0.03,0,0});
-        pointsPoints.append(var.pos()+ glm::inverse(worldMat)*glm::vec4{ 0.03,-0.03,0,0});
+        pointsPoints.append(var.pos()+ invWorld*glm::vec4{ 0.03, 0.03,0,0});
+        pointsPoints.append(var.pos()+ invWorld*glm::vec4{-0.03,-0.03,0,0});
+        pointsPoints.append(var.pos()+ invWorld*glm::vec4{-0.03, 0.03,0,0});
+        pointsPoints.append(var.pos()+ invWorld*glm::vec4{ 0.03,-0.03,0,0});
     }
     QVector<glm::ivec2> pointsEdges;
     for (int i=0;i<points.size();++i) {
@@ -39,12 +41,13 @@ void SceneGLWidget::updatePoints()
 void SceneGLWidget::updateCursor()
 {
     QVector<glm::vec4> cursorPoints;
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,0, 0.1,0});
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,0,-0.1,0});
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0, 0.1,0,0});
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{0,-0.1,0,0});
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{ 0.1,0,0,0});
-    cursorPoints.append(cursorPos+glm::inverse(worldMat)*glm::vec4{-0.1,0,0,0});
+    glm::mat4 invWorld = glm::inverse(worldMat);
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{0,0, 0.1,0});
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{0,0,-0.1,0});
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{0, 0.1,0,0});
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{0,-0.1,0,0});
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{ 0.1,0,0,0});
+    cursorPoints.append(cursorPos+invWorld*glm::vec4{-0.1,0,0,0});
     QVector<glm::ivec2> cursorEdges;
     cursorEdges.append(glm::ivec2{0,1});
     cursorEdges.append(glm::ivec2{2,3});
@@ -83,7 +86,11 @@ void SceneGLWidget::setMouseMode(int mode)
         mouseFunc =
             [this](glm::vec3 curpos){
             glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
-            cursorPos += glm::inverse(worldMat)* glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
+            glm::vec4 moveVec = glm::inverse(worldMat)* glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
+            cursorPos += moveVec;
+            if(-1 != grabbed){
+                points[grabbed].setPos(glm::vec3(points[grabbed].pos() + moveVec));
+            }
         };
         break;
     default:
@@ -117,6 +124,40 @@ void SceneGLWidget::removePointAt(int id)
     QString name = points[id].name;
     points.removeAt(id);
     emit pointRemoved(name);
+}
+
+void SceneGLWidget::cursorGrab(QString name)
+{
+    if(0 == name.compare(QString())){
+        grabbed = -1;
+        return;
+    }
+
+    for(int i=0;i<points.size();++i){
+        if(0 == points[i].name.compare(name)){
+            cursorPos = points[i].pos();
+            grabbed = i;
+            return;
+        }
+    }
+}
+
+void SceneGLWidget::cursorGrabAt(int id)
+{
+    if(-1 != id){
+        cursorPos = points[id].pos();
+    }
+    grabbed = id;
+}
+
+void SceneGLWidget::renamePoint(QString oldName, QString newName)
+{
+    for(int i=0;i<points.size();++i){
+        if(0 == points[i].name.compare(oldName)){
+            points[i].name = newName;
+            return;
+        }
+    }
 }
 
 void SceneGLWidget::initializeGL()

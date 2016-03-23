@@ -34,6 +34,9 @@ public:
     void addPoint(glm::vec3);
     void removePoint(QString name);
     void removePointAt(int id);
+    void cursorGrab(QString name);
+    void cursorGrabAt(int id);
+    void renamePoint(QString oldName, QString newName);
 
 protected:
     virtual void initializeGL();
@@ -52,6 +55,7 @@ private:
     float sizes[4];
     float cameraPosZ;
     glm::vec4 cursorPos;
+    int grabbed;
 
 signals:
     void pointAdded(QString name);

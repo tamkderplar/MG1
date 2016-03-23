@@ -25,7 +25,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QComboBox" name="modeComboBox">
+        <widget class="QComboBox" name="cb_mode">
          <item>
           <property name="text">
            <string>Rotate</string>
@@ -54,7 +54,31 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="nRLabel">
+        <widget class="QPushButton" name="pb_AddObject">
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pb_DeleteObject">
+         <property name="text">
+          <string>Delete</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cb_stereo">
+         <property name="text">
+          <string>Stereo</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_torusnR">
          <property name="text">
           <string>nR:</string>
          </property>
@@ -64,7 +88,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="nRSpinBox">
+        <widget class="QSpinBox" name="sb_torusnR">
          <property name="minimum">
           <number>3</number>
          </property>
@@ -77,7 +101,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="nrLabel">
+        <widget class="QLabel" name="label_torusnr">
          <property name="text">
           <string>nr:</string>
          </property>
@@ -87,7 +111,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="nrSpinBox">
+        <widget class="QSpinBox" name="sb_torusnr">
          <property name="minimum">
           <number>3</number>
          </property>
@@ -100,7 +124,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="labeRl">
+        <widget class="QLabel" name="label_torusR">
          <property name="text">
           <string>R:</string>
          </property>
@@ -110,7 +134,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="RSpinBox">
+        <widget class="QDoubleSpinBox" name="dsb_torusR">
          <property name="minimum">
           <double>0.010000000000000</double>
          </property>
@@ -123,7 +147,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="rlabel">
+        <widget class="QLabel" name="label_torusr">
          <property name="text">
           <string>r:</string>
          </property>
@@ -133,7 +157,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="rSpinBox">
+        <widget class="QDoubleSpinBox" name="dsb_torusr">
          <property name="minimum">
           <double>0.010000000000000</double>
          </property>
@@ -142,13 +166,6 @@
          </property>
          <property name="value">
           <double>0.300000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="stereoCheckBox">
-         <property name="text">
-          <string>Stereo</string>
          </property>
         </widget>
        </item>
@@ -201,13 +218,76 @@
            </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+           <widget class="QPushButton" name="pb_Ungrab">
+            <property name="text">
+             <string>Ungrab</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+           <widget class="QDoubleSpinBox" name="dsb_PointX">
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-99.989999999999995</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+           <widget class="QDoubleSpinBox" name="dsb_PointY">
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-99.989999999999995</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="dsb_PointZ">
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="minimum">
+             <double>-99.989999999999995</double>
+            </property>
+            <property name="singleStep">
+             <double>0.050000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_3" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
