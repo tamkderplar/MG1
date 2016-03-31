@@ -61,16 +61,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pb_DeleteObject">
-         <property name="text">
-          <string>Delete</string>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="cb_stereo">
          <property name="text">
           <string>Stereo</string>
@@ -226,6 +216,12 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="dsb_PointX">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>X:</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -239,6 +235,12 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="dsb_PointY">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Y:</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -252,6 +254,12 @@
           </item>
           <item>
            <widget class="QDoubleSpinBox" name="dsb_PointZ">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="prefix">
+             <string>Z:</string>
+            </property>
             <property name="decimals">
              <number>4</number>
             </property>
@@ -273,16 +281,34 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox">
-               <property name="enabled">
-                <bool>false</bool>
+              <widget class="QDoubleSpinBox" name="dsb_ScreenX">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="prefix">
+                <string>W:</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-99.989999999999995</double>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
-               <property name="enabled">
-                <bool>false</bool>
+              <widget class="QDoubleSpinBox" name="dsb_ScreenY">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="prefix">
+                <string>H:</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-99.989999999999995</double>
                </property>
               </widget>
              </item>
@@ -326,6 +352,7 @@
    <container>1</container>
    <slots>
     <signal>pointAdded(QString)</signal>
+    <signal>cursorPositionChanged(glm::vec3,glm::vec2)</signal>
    </slots>
   </customwidget>
  </customwidgets>

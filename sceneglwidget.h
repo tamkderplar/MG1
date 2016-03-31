@@ -22,6 +22,7 @@ public:
     void updateCursor();
 
     glm::mat4 worldMat,perspMat;
+    glm::mat4 viewportMat;
     Torus torus;
     QList<PointCAM> points;
     //shader things
@@ -37,6 +38,7 @@ public:
     void cursorGrab(QString name);
     void cursorGrabAt(int id);
     void renamePoint(QString oldName, QString newName);
+    glm::vec3 cursorPosition() const;
 
 protected:
     virtual void initializeGL();
@@ -60,6 +62,8 @@ private:
 signals:
     void pointAdded(QString name);
     void pointRemoved(QString name);
+    void cursorPositionChanged(glm::vec3,glm::vec2);
+
 
 public slots:
 

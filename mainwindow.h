@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidgetItem>
+#include "glm.h"
 
 namespace Ui {
 class MainWindow;
@@ -41,7 +42,9 @@ private slots:
 
     void on_listWidget_itemActivated(QListWidgetItem *item);
 
-    void on_listWidget_itemChanged(QListWidgetItem *current);
+    void on_pb_AddObject_clicked();
+
+    void on_widgetScene_cursorPositionChanged(const glm::vec3 &, const glm::vec2 &);
 
 private:
     Ui::MainWindow *ui;

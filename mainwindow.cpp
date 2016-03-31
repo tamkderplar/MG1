@@ -65,7 +65,7 @@ void MainWindow::on_cb_stereo_clicked(bool checked)
 void MainWindow::on_widgetScene_pointAdded(const QString &name)
 {
     auto newitem = new QListWidgetItem(name);
-    newitem->setFlags(newitem->flags()|Qt::ItemIsEditable);
+    newitem->setFlags(newitem->flags() | Qt::ItemIsEditable);
     findChild<QListWidget*>()->addItem(newitem);
 }
 
@@ -100,6 +100,7 @@ void MainWindow::on_pb_Ungrab_clicked()
 {
     findChild<QListWidget*>()->clearSelection();
     findChild<QListWidget*>()->clearFocus();
+    findChild<SceneGLWidget*>()->cursorGrabAt(-1);
     findChild<SceneGLWidget*>()->update();
 }
 
@@ -108,7 +109,18 @@ void MainWindow::on_listWidget_itemActivated(QListWidgetItem *item)
     findChild<QListWidget*>()->editItem(item);
 }
 
-void MainWindow::on_listWidget_itemChanged(QListWidgetItem *current)
+void MainWindow::on_pb_AddObject_clicked()
 {
-    //findChild<SceneGLWidget*>()->renamePoint(previous->text(),current->text());
+    findChild<SceneGLWidget*>()->addPoint(findChild<SceneGLWidget*>()->cursorPosition());
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_widgetScene_cursorPositionChanged(const glm::vec3 &pos3, const glm::vec2 &pos2)
+{
+    findChild<QDoubleSpinBox*>("dsb_PointX")->setValue(pos3.x);
+    findChild<QDoubleSpinBox*>("dsb_PointY")->setValue(pos3.y);
+    findChild<QDoubleSpinBox*>("dsb_PointZ")->setValue(pos3.z);
+
+    findChild<QDoubleSpinBox*>("dsb_ScreenX")->setValue(pos2.x);
+    findChild<QDoubleSpinBox*>("dsb_ScreenY")->setValue(pos2.y);
 }
