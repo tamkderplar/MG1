@@ -8,10 +8,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     //hardcode-add some points
-    findChild<SceneGLWidget*>()->addPoint({0.5,0,0});
+    /*findChild<SceneGLWidget*>()->addPoint({0.5,0,0});
     findChild<SceneGLWidget*>()->addPoint({-0.5,0,0});
     findChild<SceneGLWidget*>()->addPoint({0,0.5,0});
-    findChild<SceneGLWidget*>()->addPoint({0,-0.5,0});
+    findChild<SceneGLWidget*>()->addPoint({0,-0.5,0});*/
 }
 
 MainWindow::~MainWindow()

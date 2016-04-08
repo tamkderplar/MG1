@@ -208,6 +208,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QListView" name="listView">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pb_Ungrab">
             <property name="text">
              <string>Ungrab</string>

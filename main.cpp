@@ -1,15 +1,15 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-#include <QGLFormat>
+#include <QSurfaceFormat>
 
 int main(int argc, char *argv[])
 {
-    QGLFormat format;
+    QSurfaceFormat format;
     format.setVersion(3,3);
-    format.setProfile(QGLFormat::CoreProfile);
-    format.setSampleBuffers(true);
-    QGLFormat::setDefaultFormat(format);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setSamples(8);
+    QSurfaceFormat::setDefaultFormat(format);
 
     QApplication a(argc, argv);
     MainWindow w;

@@ -1,7 +1,7 @@
 #ifndef SCENEGLWIDGET_H
 #define SCENEGLWIDGET_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -10,8 +10,10 @@
 #include "torus.h"
 #include "fullshader.h"
 #include "pointcam.h"
+#include "glmanager.h"
+#include "bezier3.h"
 
-class SceneGLWidget : public QGLWidget, protected QOpenGLFunctions_3_3_Core
+class SceneGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
@@ -20,11 +22,12 @@ public:
     void updateTorus();
     void updatePoints();
     void updateCursor();
+    GLManager manager;
 
     glm::mat4 worldMat,perspMat;
     glm::mat4 viewportMat;
     Torus torus;
-    QList<PointCAM> points;
+    QVector<PointCAM*> points;
     //shader things
     FullShader torusShader;
     FullShader pointsShader;

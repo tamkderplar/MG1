@@ -3,7 +3,7 @@
 #include <QMouseEvent>
 
 SceneGLWidget::SceneGLWidget(QWidget *parent)
-    :QGLWidget(parent)
+    :QOpenGLWidget(parent)
     ,torus()
     ,stereo(false)
     ,cursorPos(0,0,0,1)
@@ -24,11 +24,11 @@ void SceneGLWidget::updatePoints()
 {
     glm::mat4 invWorld = glm::inverse(worldMat);
     QVector<glm::vec4> pointsPoints;
-    for (PointCAM& var : points) {
-        pointsPoints.append(var.pos()+ invWorld*glm::vec4{ 0.03, 0.03,0,0});
-        pointsPoints.append(var.pos()+ invWorld*glm::vec4{-0.03,-0.03,0,0});
-        pointsPoints.append(var.pos()+ invWorld*glm::vec4{-0.03, 0.03,0,0});
-        pointsPoints.append(var.pos()+ invWorld*glm::vec4{ 0.03,-0.03,0,0});
+    for (PointCAM* var : points) {
+        pointsPoints.append(var->pos()+ invWorld*glm::vec4{ 0.03, 0.03,0,0});
+        pointsPoints.append(var->pos()+ invWorld*glm::vec4{-0.03,-0.03,0,0});
+        pointsPoints.append(var->pos()+ invWorld*glm::vec4{-0.03, 0.03,0,0});
+        pointsPoints.append(var->pos()+ invWorld*glm::vec4{ 0.03,-0.03,0,0});
     }
     QVector<glm::ivec2> pointsEdges;
     for (int i=0;i<points.size();++i) {
@@ -71,7 +71,8 @@ void SceneGLWidget::setMouseMode(int mode)
         mouseFunc =
             [this](glm::vec3 curpos){
             glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
-            worldMat=glm::translate(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f)*worldMat;
+            worldMat=glm::translate(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f)
+                    *worldMat;
         };
         break;
     case 2:
@@ -86,10 +87,12 @@ void SceneGLWidget::setMouseMode(int mode)
         mouseFunc =
             [this](glm::vec3 curpos){
             glm::vec3 dir = curpos-glm::vec3{lastpos.x(),lastpos.y(),0.0};
-            glm::vec4 moveVec = glm::inverse(worldMat)* glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
+            glm::vec4 moveVec = glm::inverse(worldMat)*
+                    glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
             cursorPos += moveVec;
             if(-1 != grabbed){
-                points[grabbed].setPos(glm::vec3(points[grabbed].pos() + moveVec));
+                points[grabbed]->setPos(
+                            glm::vec3(points[grabbed]->pos() + moveVec));
             }
         };
         break;
@@ -100,14 +103,15 @@ void SceneGLWidget::setMouseMode(int mode)
             float y = 1.0 - 2*curpos.y/height();
             glm::mat4 m = perspMat*viewportMat*worldMat;
             for(int i=0; i<points.size();++i){
-                glm::vec4 perspP = m * points[i].pos();
+                glm::vec4 perspP = m * points[i]->pos();
                 if(perspP.z >= cameraPosZ){
                     continue;
                 }
                 perspP.z = 0;
                 perspP = perspP/perspP.w;
-                if( (perspP.x-x)*(perspP.x-x) + (perspP.y-y)*(perspP.y-y) < 0.03*0.03){
-                    cursorPos = points[i].pos();
+                if( (perspP.x-x)*(perspP.x-x) + (perspP.y-y)*(perspP.y-y)
+                        < 0.03*0.03){
+                    cursorPos = points[i]->pos();
                     grabbed = i;
                     return;
                 }
@@ -122,10 +126,12 @@ void SceneGLWidget::setMouseMode(int mode)
 void SceneGLWidget::addPoint(glm::vec3 p)
 {
     static int numbering = 1;
-    PointCAM point(p);
-    point.name = QString("Point%1").arg(numbering);
+    PointCAM *point = new PointCAM(p,&manager);
+    point->name = QString("Point%1").arg(numbering);
     points.append(point);
-    emit pointAdded(point.name);
+    manager.addPoint(point);
+    manager.addDrawable(point);
+    emit pointAdded(point->name);
     numbering++;
 }
 
@@ -133,9 +139,11 @@ void SceneGLWidget::removePoint(QString name)
 {
     grabbed = -1;
     for(int i=0;i<points.size();++i){
-        if(0 == points[i].name.compare(name)){
+        if(0 == points[i]->name.compare(name)){
+            PointCAM *p = points[i];
             points.removeAt(i);
             emit pointRemoved(name);
+            delete p;
             return;
         }
     }
@@ -143,10 +151,12 @@ void SceneGLWidget::removePoint(QString name)
 
 void SceneGLWidget::removePointAt(int id)
 {
-    QString name = points[id].name;
+    PointCAM *p = points[id];
+    QString name = points[id]->name;
     points.removeAt(id);
     emit pointRemoved(name);
     grabbed = -1;
+    delete p;
 }
 
 void SceneGLWidget::cursorGrab(QString name)
@@ -157,8 +167,8 @@ void SceneGLWidget::cursorGrab(QString name)
     }
 
     for(int i=0;i<points.size();++i){
-        if(0 == points[i].name.compare(name)){
-            cursorPos = points[i].pos();
+        if(0 == points[i]->name.compare(name)){
+            cursorPos = points[i]->pos();
             grabbed = i;
             return;
         }
@@ -172,7 +182,7 @@ void SceneGLWidget::cursorGrabAt(int id)
         return;
     }
     if(-1 != id){
-        cursorPos = points[id].pos();
+        cursorPos = points[id]->pos();
     }
     grabbed = id;
 }
@@ -180,8 +190,8 @@ void SceneGLWidget::cursorGrabAt(int id)
 void SceneGLWidget::renamePoint(QString oldName, QString newName)
 {
     for(int i=0;i<points.size();++i){
-        if(0 == points[i].name.compare(oldName)){
-            points[i].name = newName;
+        if(0 == points[i]->name.compare(oldName)){
+            points[i]->name = newName;
             return;
         }
     }
@@ -195,8 +205,8 @@ glm::vec3 SceneGLWidget::cursorPosition() const
 void SceneGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
-    QGLFormat glFormat = QGLWidget::format();
-    if(!glFormat.sampleBuffers())
+    QSurfaceFormat glFormat = QOpenGLWidget::format();
+    if(!glFormat.samples())
         qWarning() << "Could not enable sample buffers";
 
     glClearColor(0.0f,0.0f,0.0f,1.0f);
@@ -218,7 +228,7 @@ void SceneGLWidget::initializeGL()
         qWarning() << "Could not bind shProgram";
         return;
     }
-    if(!torusShader.initBuffers(8,8)){
+    if(!torusShader.initBuffers(64,128)){
         qWarning() << "Could not bind or create buffers";
         return;
     }
@@ -231,7 +241,7 @@ void SceneGLWidget::initializeGL()
         qWarning() << "Could not bind shProgram";
         return;
     }
-    if(!cursorShader.initBuffers(1,3)){
+    if(!cursorShader.initBuffers(6,3)){
         qWarning() << "Could not bind or create buffers";
         return;
     }
@@ -244,7 +254,7 @@ void SceneGLWidget::initializeGL()
         qWarning() << "Could not bind shProgram";
         return;
     }
-    if(!pointsShader.initBuffers(1,3)){
+    if(!pointsShader.initBuffers(4,2)){
         qWarning() << "Could not bind or create buffers";
         return;
     }
@@ -252,6 +262,44 @@ void SceneGLWidget::initializeGL()
     updatePoints();
     pointsShader.release();
 
+    manager.init();
+
+    //hardcode-add some points
+    addPoint({0.5,0,0});
+    addPoint({-0.5,0,0});
+    addPoint({0,0.5,0});
+    addPoint({0,-0.5,0});
+
+    manager.addDrawable(new Bezier3({points[0],points[2],
+                                     points[1],points[3]}));
+
+    int result = -1;
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS,&result);
+    qWarning() << "GL_MAX_TRANSFORM_FEEDBACK_BUFFERS:" << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS,&result);
+    qWarning() << "GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS:"
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS,&result);
+    qWarning() << "GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS:"
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS,&result);
+    qWarning() << "GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS:"
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES,&result);
+    qWarning() << "GL_MAX_GEOMETRY_OUTPUT_VERTICES:"
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS,&result);
+    qWarning() << "GL_MAX_GEOMETRY_OUTPUT_COMPONENTS:"
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS,&result);
+    qWarning() << "GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS:"
+               << result;
 }
 
 void SceneGLWidget::resizeGL(int w, int h)
@@ -284,9 +332,10 @@ void SceneGLWidget::paintGL()
         drawScene(perspMat*viewportMat,qRgba(255,255,255,100));
     }
     //
-    qWarning() << worldMat[0][0];
+    //qWarning() << worldMat[0][0];
     glm::vec4 screenPos = perspMat*viewportMat*worldMat*cursorPos;
-    emit cursorPositionChanged(glm::vec3(cursorPos),glm::vec2(screenPos/screenPos.w));
+    emit cursorPositionChanged(glm::vec3(cursorPos),
+                               glm::vec2(screenPos/screenPos.w));
 }
 
 void SceneGLWidget::mousePressEvent(QMouseEvent *e)
@@ -310,22 +359,25 @@ void SceneGLWidget::wheelEvent(QWheelEvent *e)
     update();
 }
 
-void SceneGLWidget::drawScene(glm::mat4 transform, QColor c)
+void SceneGLWidget::drawScene(glm::mat4 viewMat, QColor c)
 {
     /*torusShader.bind();
     torusShader.setColor(c);
-    torusShader.draw(worldMat,transform,cameraPosZ);
+    torusShader.draw(worldMat,viewMat,cameraPosZ);
     torusShader.release();*/
 
     updateCursor();
     cursorShader.bind();
     cursorShader.setColor(c);
-    cursorShader.draw(worldMat,transform,cameraPosZ);
+    cursorShader.draw(worldMat,viewMat,cameraPosZ);
     cursorShader.release();
 
-    updatePoints();
+    /*updatePoints();
     pointsShader.bind();
     pointsShader.setColor(c);
-    pointsShader.draw(worldMat,transform,cameraPosZ);
-    pointsShader.release();
+    pointsShader.draw(worldMat,viewMat,cameraPosZ);
+    pointsShader.release();*/
+
+    manager.drawAll<PointCAM>({worldMat,viewMat,c,cameraPosZ});
+    manager.drawAll<Bezier3>({worldMat,viewMat,c,cameraPosZ});
 }
