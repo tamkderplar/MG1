@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     fullshader.cpp \
     pointcam.cpp \
     glmanager.cpp \
-    bezier3.cpp
+    bezier3.cpp \
+    bufferwrap.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
@@ -31,6 +32,7 @@ HEADERS  += mainwindow.h \
     pointcam.h \
     glmanager.h \
     bezier3.h \
-    glmanager.hpp
+    glmanager.hpp \
+    bufferwrap.h
 
 FORMS    += mainwindow.ui

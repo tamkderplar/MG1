@@ -73,7 +73,7 @@ void GLManager::drawAll(SceneData sdata)
         GLDrawable::setAttributes(box->shader);
         GLDrawable::preprocessor(vBuffer,box->iBuffer,sdata);
         glDrawElements(GLDrawable::glmode(),
-                       8,
+                       box->iBuffer.size()/sizeof(int),
                        GL_UNSIGNED_INT,0);
 
         //box->shader.disableAttributeArray("vertex");

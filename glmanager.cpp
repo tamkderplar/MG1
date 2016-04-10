@@ -1,5 +1,6 @@
 #include "glmanager.h"
 #include "pointcam.h"
+#include "bufferwrap.h"
 
 
 void GLManager::extendBuffer(QOpenGLBuffer &buffer, int size)

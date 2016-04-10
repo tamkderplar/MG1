@@ -21,7 +21,7 @@ public:
                              QOpenGLBuffer& iBuf,
                              SceneData sdata);
 
-    static QOpenGLBuffer subdivBuffer;
+    static int origSize;
 
     static const QString VSH;
     static const QString GSH;

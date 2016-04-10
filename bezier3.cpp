@@ -50,17 +50,35 @@ void Bezier3::preprocessor(QOpenGLBuffer& vBuf,
     glGetIntegerv(GL_VIEWPORT,viewport);
 
     glm::mat4 fullMat = sdata.viewMat*sdata.worldMat;
-    auto splitUntil128 = [&viewport,&fullMat](
+    std::function<void(glm::mat4,QVector<glm::vec4>&)> splitUntil128;
+    splitUntil128 = [&splitUntil128,&viewport,&fullMat](
             glm::mat4 vs,
             QVector<glm::vec4>&out){
-        glm::vec4 max,min;
+        float maxX,minX,maxY,minY;
         glm::mat4 v = fullMat*vs;
-        max = glm::max(glm::max(v[0],v[1]),glm::max(v[2],v[3]));
-        min = glm::min(glm::min(v[0],v[1]),glm::min(v[2],v[3]));
-        if(max.x < viewport[0] || min.x > viewport[0] + viewport[2]/2 ||
-                max.y < viewport[1] || min.y > viewport[1] + viewport[3]/2){
+        for(int i=0;i<4;++i)v[i]/=v[i].w;
+        maxX = glm::max(glm::max(v[0].x,v[1].x),glm::max(v[2].x,v[3].x));
+        maxY = glm::max(glm::max(v[0].y,v[1].y),glm::max(v[2].y,v[3].y));
+        minX = glm::min(glm::min(v[0].x,v[1].x),glm::min(v[2].x,v[3].x));
+        minY = glm::min(glm::min(v[0].y,v[1].y),glm::min(v[2].y,v[3].y));
+        //qWarning() << maxX <<" "<<minX<<" "<<maxY<<" "<<minY;
+        //do not draw if out of bounds
+        if(maxX < -1.0f || minX > 1.0f ||
+                maxY < -1.0f || minY > 1.0f){
             return;
         }
+        //split if too long
+        if((maxX-minX)*viewport[2]>128 || (maxY-minY)*viewport[3]>128)
+        {
+            glm::vec4 vv[5] = { (vs[0]+vs[1])/2.0f,
+                                (vs[0]+2.0f*vs[1]+vs[2])/4.0f,
+                                (vs[0]+3.0f*vs[1]+3.0f*vs[2]+vs[3])/8.0f,
+                                (vs[1]+2.0f*vs[2]+vs[3])/4.0f,
+                                (vs[2]+vs[3])/2.0f};
+            splitUntil128({vs[0],vv[0],vv[1],vv[2]},out);
+            splitUntil128({vv[2],vv[3],vv[4],vs[3]},out);
+        }
+        //else append and leave
         out.append(vs[0]);
         out.append(vs[1]);
         out.append(vs[2]);
@@ -78,37 +96,13 @@ void Bezier3::preprocessor(QOpenGLBuffer& vBuf,
     iBuf.unmap();
     vBuf.unmap();
 
-    QOpenGLBuffer subBuffer;
-    subBuffer = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    subBuffer.create();
-    subBuffer.setUsagePattern(QOpenGLBuffer::DynamicCopy);
-    subBuffer.bind();
-    subBuffer.allocate(out.data(),out.size()*sizeof(glm::vec4));
-    QOpenGLBuffer isubBuffer;
-    isubBuffer = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-    isubBuffer.create();
-    isubBuffer.setUsagePattern(QOpenGLBuffer::DynamicCopy);
-    isubBuffer.bind();
-    isubBuffer.allocate(out.size()*sizeof(int));
     for(int i=0;i<out.size();++i){
-        isubBuffer.write(i*sizeof(int),&i,sizeof(int));
+        //isubBuffer.write(i*sizeof(int),&i,sizeof(int));
     }
-    int vsubsize = subBuffer.size();
-    int isubsize = isubBuffer.size();
-    qWarning() << "vsubsize:" <<vsubsize<< "   isubsize:" <<isubsize;
+    //int vsubsize = subBuffer.size();
+    //int isubsize = isubBuffer.size();
+    //qWarning() << "vsubsize:" <<vsubsize<< "   isubsize:" <<isubsize;
     iBuf.bind();
-    iBuf.allocate(8*sizeof(int));
-    for(int i=0;i<out.size();++i){
-        iBuf.write(i*sizeof(int),&i,sizeof(int));
-    }
-    int i=0;
-    iBuf.write(4*sizeof(int),&i,sizeof(int));
-    i=2;
-    iBuf.write(5*sizeof(int),&i,sizeof(int));
-    i=1;
-    iBuf.write(6*sizeof(int),&i,sizeof(int));
-    i=3;
-    iBuf.write(7*sizeof(int),&i,sizeof(int));
     vBuf.bind();
 }
 
