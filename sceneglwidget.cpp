@@ -129,6 +129,9 @@ void SceneGLWidget::removePoint(QString name)
     for(int i=0;i<points.size();++i){
         if(0 == points[i]->objectName().compare(name)){
             QObject *p = points[i];
+            if(PointCAM*point=qobject_cast<PointCAM*>(p)){
+                manager.removePoint(point);
+            }
             points.removeAt(i);
             emit pointRemoved(name);
             delete p;
@@ -141,6 +144,9 @@ void SceneGLWidget::removePointAt(int id)
 {
     QObject *p = points[id];
     QString name = points[id]->objectName();
+    if(PointCAM*point=qobject_cast<PointCAM*>(p)){
+        manager.removePoint(point);
+    }
     points.removeAt(id);
     emit pointRemoved(name);
     grabbed = -1;
