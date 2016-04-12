@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QOpenGLBuffer>
+#include <QOpenGLFunctions_3_3_Core>
 #include "glm.h"
 #include "pointcam.h"
 
@@ -17,6 +18,7 @@ class GLManager
     QOpenGLBuffer vBuffer;
     //map of vertex offsets (in bytes) for each PointCAM
     QMap<const PointCAM*,int> v_offsets;
+    //QMap<int,QVector<void*>>
 
     //pair for storing index buffer and shader program for each drawable type
     //all drawable objects of same type share index buffer
@@ -38,11 +40,16 @@ public:
     void init();
     template<class GLDrawable>
     void addDrawable(GLDrawable*);
+    //template<class GLDrawable>
+    //void removeDrawable(GLDrawable*);
+    //template<class GLDrawable>
+    //void updateDrawable(GLDrawable*);
     void addPoint(PointCAM*);
+    void removePoint(PointCAM*);
     bool updateData(PointCAM*obj,glm::vec4 data,int offset);
 
     template<class GLDrawable>
-    void drawAll(SceneData sdata);
+    void drawAll(SceneData sdata,QOpenGLFunctions_3_3_Core*);
 };
 
 #include "glmanager.hpp"

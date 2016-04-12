@@ -61,7 +61,7 @@ void GLManager::addDrawable(GLDrawable *obj)
 }
 
 template<class GLDrawable>
-void GLManager::drawAll(SceneData sdata)
+void GLManager::drawAll(SceneData sdata,QOpenGLFunctions_3_3_Core*glfunc)
 {
     ShaderBox*box = shBoxes[GLDrawable::id()];
     {
@@ -69,12 +69,12 @@ void GLManager::drawAll(SceneData sdata)
         vBuffer.bind();
         box->iBuffer.bind();
 
+        GLDrawable::preprocessor(vBuffer,box->iBuffer,sdata);
         GLDrawable::setUniforms(box->shader,sdata);
         GLDrawable::setAttributes(box->shader);
-        GLDrawable::preprocessor(vBuffer,box->iBuffer,sdata);
-        glDrawElements(GLDrawable::glmode(),
+        glfunc->glDrawElementsInstanced(GLDrawable::glmode(),
                        box->iBuffer.size()/sizeof(int),
-                       GL_UNSIGNED_INT,0);
+                       GL_UNSIGNED_INT,0,GLDrawable::instances());
 
         //box->shader.disableAttributeArray("vertex");
         //vBuffer.release();

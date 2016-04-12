@@ -54,6 +54,21 @@ void GLManager::addPoint(PointCAM *p)
     vBuffer.release();
 }
 
+void GLManager::removePoint(PointCAM *p)
+{
+    if(!v_offsets.contains(p)){
+        return;
+    }
+
+    vBuffer.bind();
+
+    for(auto&pair:v_offsets){
+
+    }
+
+    vBuffer.release();
+}
+
 bool GLManager::updateData(PointCAM *obj, glm::vec4 data, int offset)
 {
     /*constexpr int ID = PointCAM::id();

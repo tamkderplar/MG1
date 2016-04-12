@@ -1,5 +1,7 @@
 #include "bezier3.h"
 
+int Bezier3::instanceSplit = 1;
+
 Bezier3::Bezier3(QVector<PointCAM *> controlPoints)
 {
     if(controlPoints.size()==0){
@@ -19,6 +21,7 @@ QList<const PointCAM *> Bezier3::children() const
 void Bezier3::setUniforms(QOpenGLShaderProgram &shader, SceneData sdata)
 {
     typedef GLfloat (*parr44)[4][4];
+    shader.setUniformValue("split",instanceSplit);
     shader.setUniformValue("transform",*(parr44)&sdata.worldMat);
     shader.setUniformValue("perspective",*(parr44)&sdata.viewMat);
     shader.setUniformValue("color",sdata.color);
@@ -50,7 +53,7 @@ void Bezier3::preprocessor(QOpenGLBuffer& vBuf,
     glGetIntegerv(GL_VIEWPORT,viewport);
 
     glm::mat4 fullMat = sdata.viewMat*sdata.worldMat;
-    std::function<void(glm::mat4,QVector<glm::vec4>&)> splitUntil128;
+    std::function<int(glm::mat4,QVector<glm::vec4>&)> splitUntil128;
     splitUntil128 = [&splitUntil128,&viewport,&fullMat](
             glm::mat4 vs,
             QVector<glm::vec4>&out){
@@ -65,9 +68,9 @@ void Bezier3::preprocessor(QOpenGLBuffer& vBuf,
         //do not draw if out of bounds
         if(maxX < -1.0f || minX > 1.0f ||
                 maxY < -1.0f || minY > 1.0f){
-            return;
+            return 1;
         }
-        //split if too long
+        /*//split if too long
         if((maxX-minX)*viewport[2]>128 || (maxY-minY)*viewport[3]>128)
         {
             glm::vec4 vv[5] = { (vs[0]+vs[1])/2.0f,
@@ -83,18 +86,23 @@ void Bezier3::preprocessor(QOpenGLBuffer& vBuf,
         out.append(vs[1]);
         out.append(vs[2]);
         out.append(vs[3]);
+        /**/
+        return 1+int((maxX-minX)*viewport[2]+(maxY-minY)*viewport[3])/128;
     };
 
+    int splitCount=0;
     QVector<glm::vec4> out;
     for(int i=0;i<curveCount;++i){
         glm::vec4 v0 = vertices[indices[i*4+0]];
         glm::vec4 v1 = vertices[indices[i*4+1]];
         glm::vec4 v2 = vertices[indices[i*4+2]];
         glm::vec4 v3 = vertices[indices[i*4+3]];
-        splitUntil128(glm::mat4(v0,v1,v2,v3),out);
+        splitCount = qMax(splitCount,
+                          splitUntil128(glm::mat4(v0,v1,v2,v3),out));
     }
     iBuf.unmap();
     vBuf.unmap();
+    instanceSplit = splitCount;
 
     for(int i=0;i<out.size();++i){
         //isubBuffer.write(i*sizeof(int),&i,sizeof(int));
@@ -113,9 +121,11 @@ using namespace glm;
 const QString Bezier3::VSH = GLSL(330,
     in vec4 vertex;
     uniform mat4 transform;
+    out int instanceID;
 
     void main (void)
     {
+        instanceID = gl_InstanceID;
         gl_Position = transform*vertex;
     }
 );
@@ -124,6 +134,8 @@ const QString Bezier3::GSH = GLSL(330,
     layout(line_strip, max_vertices = 256) out;
     uniform mat4 perspective;
     uniform float cameraPosZ;
+    uniform int split;
+    in int instanceID[];
 
     void postCulledSegment (vec4 v0, vec4 v1)
     {
@@ -163,9 +175,10 @@ const QString Bezier3::GSH = GLSL(330,
         vec4 v1 = gl_in[1].gl_Position;
         vec4 v2 = gl_in[2].gl_Position;
         vec4 v3 = gl_in[3].gl_Position;
-        vec4 v = v0;
+        float t0 = instanceID[0]/float(split); float u0 = 1-t0;
+        vec4 v = v0*(u0*u0*u0) + v1*(3*u0*u0*t0) + v2*(3*u0*t0*t0) + v3*(t0*t0*t0);
         for(int i=1;i<=128;++i){
-            float t = i/float(128);
+            float t = (instanceID[0]*128+i)/float(split*128);
             float u = 1-t;
             vec4 vv = v0*(u*u*u) + v1*(3*u*u*t) + v2*(3*u*t*t) + v3*(t*t*t);
             postCulledSegment(v,vv);

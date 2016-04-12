@@ -20,8 +20,10 @@ public:
     static void preprocessor(QOpenGLBuffer& vBuf,
                              QOpenGLBuffer& iBuf,
                              SceneData sdata);
+    static int instances(){return instanceSplit;}
 
     static int origSize;
+    static int instanceSplit;
 
     static const QString VSH;
     static const QString GSH;

@@ -20,17 +20,15 @@ public:
     explicit SceneGLWidget(QWidget *parent = 0);
 
     void updateTorus();
-    void updatePoints();
     void updateCursor();
     GLManager manager;
 
     glm::mat4 worldMat,perspMat;
     glm::mat4 viewportMat;
     Torus torus;
-    QVector<PointCAM*> points;
+    QVector<QObject*> points;
     //shader things
     FullShader torusShader;
-    FullShader pointsShader;
     FullShader cursorShader;
     //
     bool stereo;

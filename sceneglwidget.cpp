@@ -20,24 +20,6 @@ void SceneGLWidget::updateTorus()
     torusShader.write(torus.points,torus.edges);
 }
 
-void SceneGLWidget::updatePoints()
-{
-    glm::mat4 invWorld = glm::inverse(worldMat);
-    QVector<glm::vec4> pointsPoints;
-    for (PointCAM* var : points) {
-        pointsPoints.append(var->pos()+ invWorld*glm::vec4{ 0.03, 0.03,0,0});
-        pointsPoints.append(var->pos()+ invWorld*glm::vec4{-0.03,-0.03,0,0});
-        pointsPoints.append(var->pos()+ invWorld*glm::vec4{-0.03, 0.03,0,0});
-        pointsPoints.append(var->pos()+ invWorld*glm::vec4{ 0.03,-0.03,0,0});
-    }
-    QVector<glm::ivec2> pointsEdges;
-    for (int i=0;i<points.size();++i) {
-        pointsEdges.append(glm::ivec2{4*i+0,4*i+1});
-        pointsEdges.append(glm::ivec2{4*i+2,4*i+3});
-    }
-    pointsShader.write(pointsPoints,pointsEdges);
-}
-
 void SceneGLWidget::updateCursor()
 {
     QVector<glm::vec4> cursorPoints;
@@ -91,8 +73,10 @@ void SceneGLWidget::setMouseMode(int mode)
                     glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
             cursorPos += moveVec;
             if(-1 != grabbed){
-                points[grabbed]->setPos(
-                            glm::vec3(points[grabbed]->pos() + moveVec));
+                if(PointCAM*point = qobject_cast<PointCAM*>(points[grabbed]))
+                {
+                    point->setPos(glm::vec3(point->pos() + moveVec));
+                }
             }
         };
         break;
@@ -103,7 +87,11 @@ void SceneGLWidget::setMouseMode(int mode)
             float y = 1.0 - 2*curpos.y/height();
             glm::mat4 m = perspMat*viewportMat*worldMat;
             for(int i=0; i<points.size();++i){
-                glm::vec4 perspP = m * points[i]->pos();
+                PointCAM*point;
+                if(!(point=qobject_cast<PointCAM*>(points[i]))){
+                    continue;
+                }
+                glm::vec4 perspP = m * point->pos();
                 if(perspP.z >= cameraPosZ){
                     continue;
                 }
@@ -111,7 +99,7 @@ void SceneGLWidget::setMouseMode(int mode)
                 perspP = perspP/perspP.w;
                 if( (perspP.x-x)*(perspP.x-x) + (perspP.y-y)*(perspP.y-y)
                         < 0.03*0.03){
-                    cursorPos = points[i]->pos();
+                    cursorPos = point->pos();
                     grabbed = i;
                     return;
                 }
@@ -127,11 +115,11 @@ void SceneGLWidget::addPoint(glm::vec3 p)
 {
     static int numbering = 1;
     PointCAM *point = new PointCAM(p,&manager);
-    point->name = QString("Point%1").arg(numbering);
+    point->setObjectName( QString("Point%1").arg(numbering) );
     points.append(point);
     manager.addPoint(point);
     manager.addDrawable(point);
-    emit pointAdded(point->name);
+    emit pointAdded(point->objectName());
     numbering++;
 }
 
@@ -139,8 +127,8 @@ void SceneGLWidget::removePoint(QString name)
 {
     grabbed = -1;
     for(int i=0;i<points.size();++i){
-        if(0 == points[i]->name.compare(name)){
-            PointCAM *p = points[i];
+        if(0 == points[i]->objectName().compare(name)){
+            QObject *p = points[i];
             points.removeAt(i);
             emit pointRemoved(name);
             delete p;
@@ -151,8 +139,8 @@ void SceneGLWidget::removePoint(QString name)
 
 void SceneGLWidget::removePointAt(int id)
 {
-    PointCAM *p = points[id];
-    QString name = points[id]->name;
+    QObject *p = points[id];
+    QString name = points[id]->objectName();
     points.removeAt(id);
     emit pointRemoved(name);
     grabbed = -1;
@@ -167,10 +155,12 @@ void SceneGLWidget::cursorGrab(QString name)
     }
 
     for(int i=0;i<points.size();++i){
-        if(0 == points[i]->name.compare(name)){
-            cursorPos = points[i]->pos();
-            grabbed = i;
-            return;
+        if(0 == points[i]->objectName().compare(name)){
+            if(PointCAM*point=qobject_cast<PointCAM*>(points[i])){
+                cursorPos = point->pos();
+                grabbed = i;
+                return;
+            }
         }
     }
 }
@@ -182,7 +172,9 @@ void SceneGLWidget::cursorGrabAt(int id)
         return;
     }
     if(-1 != id){
-        cursorPos = points[id]->pos();
+        if(PointCAM*point=qobject_cast<PointCAM*>(points[id])){
+            cursorPos = point->pos();
+        }
     }
     grabbed = id;
 }
@@ -190,8 +182,8 @@ void SceneGLWidget::cursorGrabAt(int id)
 void SceneGLWidget::renamePoint(QString oldName, QString newName)
 {
     for(int i=0;i<points.size();++i){
-        if(0 == points[i]->name.compare(oldName)){
-            points[i]->name = newName;
+        if(0 == points[i]->objectName().compare(oldName)){
+            points[i]->setObjectName(newName);
             return;
         }
     }
@@ -249,19 +241,6 @@ void SceneGLWidget::initializeGL()
     updateCursor();
     cursorShader.release();
 
-    pointsShader.prepareShaderProgram();
-    if(!pointsShader.bind()){
-        qWarning() << "Could not bind shProgram";
-        return;
-    }
-    if(!pointsShader.initBuffers(4,2)){
-        qWarning() << "Could not bind or create buffers";
-        return;
-    }
-    //write
-    updatePoints();
-    pointsShader.release();
-
     manager.init();
 
     //hardcode-add some points
@@ -270,8 +249,10 @@ void SceneGLWidget::initializeGL()
     addPoint({0,0.5,0});
     addPoint({0,-0.5,0});
 
-    manager.addDrawable(new Bezier3({points[0],points[2],
-                                     points[1],points[3]}));
+    manager.addDrawable(new Bezier3({(PointCAM*)points[0],
+                                     (PointCAM*)points[2],
+                                     (PointCAM*)points[1],
+                                     (PointCAM*)points[3]}));
 
     int result = -1;
     glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS,&result);
@@ -378,6 +359,6 @@ void SceneGLWidget::drawScene(glm::mat4 viewMat, QColor c)
     pointsShader.draw(worldMat,viewMat,cameraPosZ);
     pointsShader.release();*/
 
-    manager.drawAll<PointCAM>({worldMat,viewMat,c,cameraPosZ});
-    manager.drawAll<Bezier3>({worldMat,viewMat,c,cameraPosZ});
+    manager.drawAll<PointCAM>({worldMat,viewMat,c,cameraPosZ},this);
+    manager.drawAll<Bezier3>({worldMat,viewMat,c,cameraPosZ},this);
 }

@@ -41,10 +41,10 @@ public:
     static void preprocessor(QOpenGLBuffer& vBuf,
                              QOpenGLBuffer& iBuf,
                              SceneData sdata);
+    static constexpr int instances(){return 1;}
 
 
     glm::vec4 position;
-    QString name;
 
     static const QString VSH;
     static const QString GSH;

@@ -75,7 +75,8 @@ int BufferWrap<T>::tempOffest() const
     return tempOff;
 }
 
-void BufferWrap::dropTemporary()
+template<class T>
+void BufferWrap<T>::dropTemporary()
 {
     tempOff = -1;
 }
