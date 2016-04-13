@@ -16,15 +16,18 @@ class GLManager
     //vertex buffer to store all PointCAM vertices
     //?draw PointCAM directly from these or as drawables?
     QOpenGLBuffer vBuffer;
+    //QQueue<int> vBufDelQ;//queue to store free(removed) vbuffer indices
     //map of vertex offsets (in bytes) for each PointCAM
     QMap<const PointCAM*,int> v_offsets;
     //QMap<int,QVector<void*>>
 
-    //pair for storing index buffer and shader program for each drawable type
+    //struct for storing index buffer, usable count and shader program
+    //  for each drawable type
     //all drawable objects of same type share index buffer
-    //,because they're all drawn by the same shader program
+    //  ,because they're all drawn by the same shader program
     struct ShaderBox{
         QOpenGLBuffer iBuffer;
+        int iBufCount;
         QOpenGLShaderProgram shader;
     };
     QMap<GLDrawableID,ShaderBox*> shBoxes;
@@ -40,8 +43,8 @@ public:
     void init();
     template<class GLDrawable>
     void addDrawable(GLDrawable*);
-    //template<class GLDrawable>
-    //void removeDrawable(GLDrawable*);
+    template<class GLDrawable>
+    void removeDrawable(GLDrawable*);
     //template<class GLDrawable>
     //void updateDrawable(GLDrawable*);
     void addPoint(PointCAM*);

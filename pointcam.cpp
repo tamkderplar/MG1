@@ -20,6 +20,7 @@ void PointCAM::setPos(glm::vec3 p)
 {
     position = glm::vec4(p,1);
     man->updateData(this,position,0);
+    emit pointChanged(this);
 }
 
 glm::vec4 PointCAM::pos() const
@@ -27,9 +28,9 @@ glm::vec4 PointCAM::pos() const
     return position;
 }
 
-QList<const PointCAM *> PointCAM::children() const
+const QList<PointCAM *> PointCAM::children()
 {
-    return QList<const PointCAM *>({this});
+    return QList<PointCAM *>({this});
 }
 
 /*constexpr GLDrawableID PointCAM::id()

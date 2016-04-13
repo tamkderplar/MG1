@@ -74,6 +74,8 @@ void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
     findChild<SceneGLWidget*>()->removePointAt(findChild<QListWidget*>()->row(item));
     findChild<QListWidget*>()->takeItem(findChild<QListWidget*>()->row(item));
     delete item;
+    findChild<QListWidget*>()->clearSelection();
+    findChild<SceneGLWidget*>()->cursorGrabAt(-1);
     findChild<SceneGLWidget*>()->update();
 }
 

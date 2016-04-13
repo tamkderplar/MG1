@@ -17,6 +17,7 @@ void GLManager::addType()
     box->iBuffer = QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
     box->iBuffer.create();
     box->iBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    box->iBufCount = 0;
 
     bool result = false;
     result = box->shader.addShaderFromSourceCode(QOpenGLShader::Vertex,
@@ -45,19 +46,60 @@ void GLManager::addDrawable(GLDrawable *obj)
     if(!shBoxes.contains(ID)){
         addType<GLDrawable>();
     }
-    shBoxes[ID]->iBuffer.bind();
-    obj_offsets.insert(obj,shBoxes[ID]->iBuffer.size());
-    extendBuffer(shBoxes[ID]->iBuffer,GLDrawable::ibufferSize());
-    const QList<const PointCAM*> children = obj->children();
+    QOpenGLBuffer&iBuf = shBoxes[ID]->iBuffer;
+    iBuf.bind();
+
+    int writeOffset = shBoxes[ID]->iBufCount*GLDrawable::ibufferSize();
+    if(writeOffset==iBuf.size()){
+        extendBuffer(iBuf,GLDrawable::ibufferSize());
+    }
+    obj_offsets.insert(obj,writeOffset);
+
+    const QList<PointCAM*> children = obj->children();
     for(int i=0;i<children.size();++i){
         const PointCAM*p = children[i];
         int index = v_offsets[p]/sizeof(glm::vec4);
-        shBoxes[ID]->iBuffer.write(shBoxes[ID]->iBuffer.size()
-                                        - GLDrawable::ibufferSize()
-                                        + i*sizeof(int),
-                                   &index,sizeof(int));
+        iBuf.write(writeOffset + i*sizeof(int), &index, sizeof(int));
     }
-    shBoxes[ID]->iBuffer.release();
+    iBuf.release();
+    shBoxes[ID]->iBufCount++;
+}
+
+template<class GLDrawable>
+void GLManager::removeDrawable(GLDrawable *obj)
+{
+    constexpr int ID = GLDrawable::id();
+    if(!drawables.contains(ID,obj)){
+        throw std::logic_error("removing unexisting drawable");
+        //?return;
+    }
+
+    int removed_offset = obj_offsets[obj];
+    int removedID = removed_offset/GLDrawable::ibufferSize();
+
+    for(void*object:drawables.values(GLDrawable::id())){
+        auto pair= obj_offsets.find(object);
+        if(pair.value()>removed_offset){
+            pair.value()-=sizeof(int);
+        }
+    }
+    obj_offsets.remove(obj);
+    int idxCount = GLDrawable::ibufferSize()/sizeof(int);
+
+    QOpenGLBuffer&buf = shBoxes[GLDrawable::id()]->iBuffer;
+    buf.bind();
+    int*indices = (int*)buf.map(QOpenGLBuffer::ReadWrite);
+    int bufSize = buf.size()/sizeof(int);
+    //?;i<iBufCount-idxCount;?
+    for(int i=removedID;i<bufSize-idxCount;++i){
+        indices[i] = indices[i+idxCount];
+    }
+    //indices[bufSize-1]=indices[0];
+    buf.unmap();
+    buf.release();
+    shBoxes[GLDrawable::id()]->iBufCount--;
+
+    drawables.remove(GLDrawable::id(),obj);
 }
 
 template<class GLDrawable>
@@ -73,7 +115,7 @@ void GLManager::drawAll(SceneData sdata,QOpenGLFunctions_3_3_Core*glfunc)
         GLDrawable::setUniforms(box->shader,sdata);
         GLDrawable::setAttributes(box->shader);
         glfunc->glDrawElementsInstanced(GLDrawable::glmode(),
-                       box->iBuffer.size()/sizeof(int),
+                       box->iBufCount*GLDrawable::ibufferSize()/sizeof(int),
                        GL_UNSIGNED_INT,0,GLDrawable::instances());
 
         //box->shader.disableAttributeArray("vertex");

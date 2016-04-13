@@ -22,7 +22,10 @@ SOURCES += main.cpp\
     pointcam.cpp \
     glmanager.cpp \
     bezier3.cpp \
-    bufferwrap.cpp
+    bufferwrap.cpp \
+    bspline.cpp \
+    bezier3c0.cpp \
+    linesegment.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
@@ -33,6 +36,9 @@ HEADERS  += mainwindow.h \
     glmanager.h \
     bezier3.h \
     glmanager.hpp \
-    bufferwrap.h
+    bufferwrap.h \
+    bspline.h \
+    bezier3c0.h \
+    linesegment.h
 
 FORMS    += mainwindow.ui

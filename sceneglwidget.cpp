@@ -1,6 +1,7 @@
 #include "sceneglwidget.h"
 #include <QGLFormat>
 #include <QMouseEvent>
+#include "bspline.h"
 
 SceneGLWidget::SceneGLWidget(QWidget *parent)
     :QOpenGLWidget(parent)
@@ -130,6 +131,7 @@ void SceneGLWidget::removePoint(QString name)
         if(0 == points[i]->objectName().compare(name)){
             QObject *p = points[i];
             if(PointCAM*point=qobject_cast<PointCAM*>(p)){
+                manager.removeDrawable(point);
                 manager.removePoint(point);
             }
             points.removeAt(i);
@@ -145,6 +147,7 @@ void SceneGLWidget::removePointAt(int id)
     QObject *p = points[id];
     QString name = points[id]->objectName();
     if(PointCAM*point=qobject_cast<PointCAM*>(p)){
+        manager.removeDrawable(point);
         manager.removePoint(point);
     }
     points.removeAt(id);
@@ -259,6 +262,11 @@ void SceneGLWidget::initializeGL()
                                      (PointCAM*)points[2],
                                      (PointCAM*)points[1],
                                      (PointCAM*)points[3]}));
+    new BSpline({   (PointCAM*)points[0],(PointCAM*)points[2],
+                    (PointCAM*)points[1],(PointCAM*)points[3],
+                    (PointCAM*)points[0],(PointCAM*)points[2],
+                    (PointCAM*)points[1]
+                    },&manager);
 
     int result = -1;
     glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS,&result);

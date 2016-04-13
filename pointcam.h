@@ -22,6 +22,7 @@ typedef int GLDrawableID;
 class PointCAM : public QObject
 {
     Q_OBJECT
+
     GLManager* man;
 public:
     explicit PointCAM(GLManager *manager=0, QObject *parent=0);
@@ -30,7 +31,7 @@ public:
     void setPos(glm::vec3);
     glm::vec4 pos() const;
 
-    QList<const PointCAM *> children() const;
+    const QList<PointCAM *> children();
     static constexpr GLDrawableID id(){return 0;}
     static constexpr int ibufferSize(){return sizeof(int);}
     static constexpr GLenum glmode(){return GL_POINTS;}
@@ -50,6 +51,7 @@ public:
     static const QString GSH;
     static const QString FSH;
 signals:
+    void pointChanged(PointCAM*);
 
 public slots:
 

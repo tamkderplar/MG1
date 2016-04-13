@@ -13,7 +13,7 @@ Bezier3::Bezier3(QVector<PointCAM *> controlPoints)
         control.append(controlPoints.last());
 }
 
-QList<const PointCAM *> Bezier3::children() const
+const QList<PointCAM *> Bezier3::children() const
 {
     return control;
 }

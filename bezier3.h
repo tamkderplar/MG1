@@ -5,11 +5,11 @@
 
 class Bezier3
 {
-    QList<const PointCAM*> control;
+    QList<PointCAM*> control;
 public:
     Bezier3(QVector<PointCAM*> controlPoints);
 
-    QList<const PointCAM *> children() const;
+    const QList<PointCAM *> children() const;
     static constexpr GLDrawableID id(){return 1;}
     static constexpr int ibufferSize(){return 4*sizeof(int);}
     static constexpr GLenum glmode(){return GL_LINES_ADJACENCY;}

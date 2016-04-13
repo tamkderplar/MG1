@@ -42,6 +42,7 @@ void GLManager::addPoint(PointCAM *p)
     int oldbuffersize = vBuffer.size();
     int glmv4size = sizeof(glm::vec4);
 
+    //use DELQ if not empty, instead of extending buffer
     extendBuffer(vBuffer,glmv4size);
 
     glm::vec4 pos = p->pos();
@@ -52,6 +53,7 @@ void GLManager::addPoint(PointCAM *p)
     int bufsize = vBuffer.size();
     v_offsets[p] = bufsize - sizeof(glm::vec4);
     vBuffer.release();
+    qWarning()<<"added vertex under"<< (v_offsets[p]/sizeof(glm::vec4));
 }
 
 void GLManager::removePoint(PointCAM *p)
@@ -60,30 +62,9 @@ void GLManager::removePoint(PointCAM *p)
         return;
     }
 
-    //int removed_offset = v_offsets[p];
-    int removedID = v_offsets[p]/sizeof(glm::vec4);
-    int pOffset = obj_offsets[p];
-    qWarning()<<"remID:"<<removedID<<"  pOff:"<<pOffset;
-    assert(removedID*4 == pOffset);
     v_offsets.remove(p);
+    //DO DELQ
 
-    /*for(QMap<const PointCAM*,int>::iterator&pair:v_offsets){
-        if(pair.value()>removed_offset){
-            pair.value()-=sizeof(glm::vec4);
-        }
-    }*/
-    QOpenGLBuffer&buf = shBoxes[PointCAM::id()]->iBuffer;
-    buf.bind();
-    int*indices = (int*)buf.map(QOpenGLBuffer::ReadWrite);
-    int bufSize = buf.size()/sizeof(int);
-    for(int i=removedID;i<bufSize-1;++i){
-        indices[i] = indices[i+1];
-    }
-    indices[bufSize-1]=indices[0];
-    buf.unmap();
-    buf.release();
-
-    drawables.remove(PointCAM::id(),p);
 }
 
 bool GLManager::updateData(PointCAM *obj, glm::vec4 data, int offset)
