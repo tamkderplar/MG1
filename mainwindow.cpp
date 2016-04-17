@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -7,11 +8,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    findChild<SceneGLWidget*>()->installEventFilter(this);
+    /*installEventFilter(findChild<SceneGLWidget*>());
+    installEventFilter(centralWidget());*/
+
     //hardcode-add some points
-    findChild<SceneGLWidget*>()->addPoint({0.5,0,0});
+    /*findChild<SceneGLWidget*>()->addPoint({0.5,0,0});
     findChild<SceneGLWidget*>()->addPoint({-0.5,0,0});
     findChild<SceneGLWidget*>()->addPoint({0,0.5,0});
-    findChild<SceneGLWidget*>()->addPoint({0,-0.5,0});
+    findChild<SceneGLWidget*>()->addPoint({0,-0.5,0});*/
 }
 
 MainWindow::~MainWindow()
@@ -19,9 +24,69 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_cb_mode_activated(int index)
+void MainWindow::keyPressEvent(QKeyEvent *e)
+{
+    switch(e->key()){
+    case Qt::Key_1:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(0);
+        break;
+    case Qt::Key_2:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(1);
+        break;
+    case Qt::Key_3:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(2);
+        break;
+    case Qt::Key_4:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(3);
+        break;
+    case Qt::Key_5:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(4);
+        break;
+    case Qt::Key_Q:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(0);
+        break;
+    case Qt::Key_W:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(1);
+        break;
+    case Qt::Key_E:
+        findChild<QComboBox*>("cb_mode")->setCurrentIndex(2);
+        break;
+    case Qt::Key_A:
+        findChild<QPushButton*>("pb_AddObject")->animateClick();
+        break;
+    default:
+        e->ignore();
+        break;
+    }
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+
+    //qWarning() << "etype:"<<event->type();
+    if (event->type() == QEvent::KeyPress)
+    {
+         this->keyPressEvent((QKeyEvent*)(event));
+         return true;
+    }
+
+    /*if (event->type() == QEvent::KeyRelease)
+    {
+        this->keyReleaseEvent((QKeyEvent*)(event));
+        return true;
+    }*/
+
+    return QObject::eventFilter(obj, event);
+}
+
+void MainWindow::on_cb_mode_currentIndexChanged(int index)
 {
     findChild<SceneGLWidget*>()->setMouseMode(index);
+}
+
+void MainWindow::on_cb_type_currentIndexChanged(int index)
+{
+    findChild<SceneGLWidget*>()->setAddObjectType(index);
 }
 
 void MainWindow::on_sb_torusnR_valueChanged(int arg1)
@@ -62,8 +127,9 @@ void MainWindow::on_cb_stereo_clicked(bool checked)
     findChild<SceneGLWidget*>()->update();
 }
 
-void MainWindow::on_widgetScene_pointAdded(const QString &name)
+void MainWindow::on_widgetScene_objectAdded(QObject *obj)
 {
+    auto name = obj->objectName();
     auto newitem = new QListWidgetItem(name);
     newitem->setFlags(newitem->flags() | Qt::ItemIsEditable);
     findChild<QListWidget*>()->addItem(newitem);
@@ -71,9 +137,11 @@ void MainWindow::on_widgetScene_pointAdded(const QString &name)
 
 void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 {
-    findChild<SceneGLWidget*>()->removePointAt(findChild<QListWidget*>()->row(item));
+    findChild<SceneGLWidget*>()->removeObjectAt(findChild<QListWidget*>()->row(item));
     findChild<QListWidget*>()->takeItem(findChild<QListWidget*>()->row(item));
     delete item;
+    findChild<QListWidget*>()->clearSelection();
+    findChild<SceneGLWidget*>()->cursorGrabAt(-1);
     findChild<SceneGLWidget*>()->update();
 }
 
@@ -111,7 +179,12 @@ void MainWindow::on_listWidget_itemActivated(QListWidgetItem *item)
 
 void MainWindow::on_pb_AddObject_clicked()
 {
-    findChild<SceneGLWidget*>()->addPoint(findChild<SceneGLWidget*>()->cursorPosition());
+    QVector<int> indicesSelected;
+    auto itemsSelected = findChild<QListWidget*>()->selectedItems();
+    for(int i=0;i<itemsSelected.size();++i){
+        indicesSelected.append(findChild<QListWidget*>()->row(itemsSelected[i]));
+    }
+    findChild<SceneGLWidget*>()->addObject(indicesSelected);
     findChild<SceneGLWidget*>()->update();
 }
 
@@ -123,4 +196,10 @@ void MainWindow::on_widgetScene_cursorPositionChanged(const glm::vec3 &pos3, con
 
     findChild<QDoubleSpinBox*>("dsb_ScreenX")->setValue(pos2.x);
     findChild<QDoubleSpinBox*>("dsb_ScreenY")->setValue(pos2.y);
+}
+
+void MainWindow::on_cb_spline_clicked(bool checked)
+{
+    findChild<SceneGLWidget*>()->changeBSplineBasis(checked);
+    findChild<SceneGLWidget*>()->update();
 }

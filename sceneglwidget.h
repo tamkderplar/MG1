@@ -1,7 +1,7 @@
 #ifndef SCENEGLWIDGET_H
 #define SCENEGLWIDGET_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -10,32 +10,32 @@
 #include "torus.h"
 #include "fullshader.h"
 #include "pointcam.h"
+#include "glmanager.h"
+#include "bezier3.h"
 
-class SceneGLWidget : public QGLWidget, protected QOpenGLFunctions_3_3_Core
+class SceneGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
     explicit SceneGLWidget(QWidget *parent = 0);
 
     void updateTorus();
-    void updatePoints();
     void updateCursor();
+    GLManager manager;
 
     glm::mat4 worldMat,perspMat;
     glm::mat4 viewportMat;
     Torus torus;
-    QList<PointCAM> points;
+    QVector<QObject*> listObjects;
     //shader things
     FullShader torusShader;
-    FullShader pointsShader;
     FullShader cursorShader;
     //
     bool stereo;
-    void setMouseMode(int mode);
-    void addPoint(glm::vec3);
-    void removePoint(QString name);
-    void removePointAt(int id);
-    void cursorGrab(QString name);
+    void addObject(const QVector<int> &indicesSelected);
+    //void removePoint(QString name);
+    void removeObjectAt(int id);
+    //void cursorGrab(QString name);
     void cursorGrabAt(int id);
     void renamePoint(QString oldName, QString newName);
     glm::vec3 cursorPosition() const;
@@ -51,21 +51,30 @@ private:
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent*e);
 
+    PointCAM* addPoint(glm::vec3);
+    void addBezier3C0(const QVector<PointCAM*>&);
+    void addBSpline(const QVector<PointCAM*>&);
     void drawScene(glm::mat4 transform,QColor c);
 
     QPoint lastpos;
     float sizes[4];
     float cameraPosZ;
     glm::vec4 cursorPos;
-    int grabbed;
+    PointCAM* grabbedPoint;
+    //int grabbed;
+    int addObjType;
 
 signals:
-    void pointAdded(QString name);
-    void pointRemoved(QString name);
+    void objectAdded(QObject *obj);
+    void objectRemoved(QObject *obj);
     void cursorPositionChanged(glm::vec3,glm::vec2);
+    void bsplineBasisChanged(bool bezierBasis);
 
 
 public slots:
+    void setMouseMode(int mode);
+    void setAddObjectType(int type);
+    void changeBSplineBasis(bool bezierBasis);
 
 };
 

@@ -35,32 +35,27 @@ bool FullShader::prepareShaderProgram()
 bool FullShader::bind()
 {
     if(!m_shader.bind()) return false;
-    //if(!m_vertexBuffer.bind()) return false;
-    //if(!m_indexBuffer.bind()) return false;
     return true;
 }
 
 void FullShader::release()
 {
-    //m_indexBuffer.release();
-    //m_vertexBuffer.release();
     m_shader.release();
 }
 
-bool FullShader::initBuffers(int nR, int nr)
+bool FullShader::initBuffers(int pointCount, int edgeCount)
 {
     m_shader.bind();
     if(!m_vertexBuffer.create()) return false;
     m_vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     if(!m_vertexBuffer.bind()) return false;
-    m_vertexBuffer.allocate(nr*nR*sizeof(glm::vec4));
+    m_vertexBuffer.allocate(pointCount*sizeof(glm::vec4));
     m_vertexBuffer.release();
 
     if(!m_indexBuffer.create()) return false;
     m_indexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     if(!m_indexBuffer.bind()) return false;
-    m_indexBuffer.allocate((nr*(nR)+(nr)*nR)
-                           *sizeof(glm::ivec2));
+    m_indexBuffer.allocate(edgeCount*sizeof(glm::ivec2));
     m_indexBuffer.release();
     return true;
 }
@@ -86,13 +81,13 @@ void FullShader::write(QVector<glm::vec4> points, QVector<glm::ivec2> edges)
     m_indexCount = edges.size();
 }
 
-void FullShader::draw(glm::mat4 transform,glm::mat4 perspective,float cameraPosZ)
+void FullShader::draw(glm::mat4 worldMat,glm::mat4 viewMat,float cameraPosZ)
 {
     typedef GLfloat (*parr44)[4][4];
     m_vertexBuffer.bind();
     m_indexBuffer.bind();
-    m_shader.setUniformValue("transform",*(parr44)&transform);
-    m_shader.setUniformValue("perspective",*(parr44)&perspective);
+    m_shader.setUniformValue("transform",*(parr44)&worldMat);
+    m_shader.setUniformValue("perspective",*(parr44)&viewMat);
     m_shader.setUniformValue("color",color);
     m_shader.setUniformValue("cameraPosZ",cameraPosZ);
     m_shader.setAttributeBuffer("vertex", GL_FLOAT, 0, 4, 4*sizeof(float));

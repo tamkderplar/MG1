@@ -19,13 +19,28 @@ SOURCES += main.cpp\
     sceneglwidget.cpp \
     torus.cpp \
     fullshader.cpp \
-    pointcam.cpp
+    pointcam.cpp \
+    glmanager.cpp \
+    bezier3.cpp \
+    bufferwrap.cpp \
+    bspline.cpp \
+    bezier3c0.cpp \
+    linesegment.cpp \
+    bsplinebasis.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
     torus.h \
     glm.h \
     fullshader.h \
-    pointcam.h
+    pointcam.h \
+    glmanager.h \
+    bezier3.h \
+    glmanager.hpp \
+    bufferwrap.h \
+    bspline.h \
+    bezier3c0.h \
+    linesegment.h \
+    bsplinebasis.h
 
 FORMS    += mainwindow.ui

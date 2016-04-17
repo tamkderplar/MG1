@@ -15,9 +15,9 @@ public:
     bool prepareShaderProgram();
     bool bind();
     void release();
-    bool initBuffers(int nR, int nr);
+    bool initBuffers(int pointCount, int edgeCount);
     void write(QVector<glm::vec4> points,QVector<glm::ivec2> edges);
-    void draw(glm::mat4 transform,glm::mat4 perspective,float);
+    void draw(glm::mat4 worldMat,glm::mat4 v,float);
     void setColor(QColor c);
 private:
     QOpenGLShaderProgram m_shader;
