@@ -3,17 +3,20 @@
 
 PointCAM::PointCAM(GLManager *manager,QObject *parent)
     :QObject(parent)
-    ,
-      man(manager)
+    ,man(manager)
 {
 }
 
 PointCAM::PointCAM(glm::vec3 p,GLManager *manager, QObject *parent)
     :QObject(parent)
-    ,
-      man(manager)
+    ,man(manager)
     ,position(glm::vec4(p,1))
 {
+}
+
+PointCAM::~PointCAM()
+{
+    emit pointRemoved(this);
 }
 
 void PointCAM::setPos(glm::vec3 p)
@@ -32,21 +35,6 @@ const QList<PointCAM *> PointCAM::children()
 {
     return QList<PointCAM *>({this});
 }
-
-/*constexpr GLDrawableID PointCAM::id()
-{
-    return 0;
-}
-
-constexpr int PointCAM::ibufferSize()
-{
-    return sizeof(int);
-}
-
-constexpr GLenum PointCAM::glmode()
-{
-    return GL_POINTS;
-}*/
 
 void PointCAM::setUniforms(QOpenGLShaderProgram &shader,SceneData sdata)
 {

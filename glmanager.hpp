@@ -61,8 +61,22 @@ void GLManager::addDrawable(GLDrawable *obj)
         int index = v_offsets[p]/sizeof(glm::vec4);
         iBuf.write(writeOffset + i*sizeof(int), &index, sizeof(int));
     }
-    iBuf.release();
     shBoxes[ID]->iBufCount++;
+    //debug
+    if(ID==1){
+        int*indices=(int*)iBuf.map(QOpenGLBuffer::ReadWrite);
+        qWarning()<<"added Bezier at offset:"<<writeOffset;
+        qWarning()<<"state:";
+        for(void*object:drawables.values(GLDrawable::id())){
+            auto pair= obj_offsets.find(object);
+            qWarning()<<pair.value()<<":"<<indices[pair.value()/4]<<" "
+                        <<indices[pair.value()/4+1]<<" "
+                          <<indices[pair.value()/4+2]<<" "
+                            <<indices[pair.value()/4+3]<<" ";
+        }
+        iBuf.unmap();
+    }
+    iBuf.release();
 }
 
 template<class GLDrawable>
@@ -70,17 +84,17 @@ void GLManager::removeDrawable(GLDrawable *obj)
 {
     constexpr int ID = GLDrawable::id();
     if(!drawables.contains(ID,obj)){
-        throw std::logic_error("removing unexisting drawable");
-        //?return;
+        //?throw std::logic_error("removing unexisting drawable");
+        return;
     }
 
     int removed_offset = obj_offsets[obj];
-    int removedID = removed_offset/GLDrawable::ibufferSize();
+    int removedID = removed_offset/sizeof(int);
 
     for(void*object:drawables.values(GLDrawable::id())){
         auto pair= obj_offsets.find(object);
         if(pair.value()>removed_offset){
-            pair.value()-=sizeof(int);
+            pair.value()-=GLDrawable::ibufferSize();
         }
     }
     obj_offsets.remove(obj);
@@ -95,17 +109,30 @@ void GLManager::removeDrawable(GLDrawable *obj)
         indices[i] = indices[i+idxCount];
     }
     //indices[bufSize-1]=indices[0];
-    buf.unmap();
-    buf.release();
     shBoxes[GLDrawable::id()]->iBufCount--;
 
     drawables.remove(GLDrawable::id(),obj);
+
+    if(ID==1){
+        qWarning()<<"removed Bezier at offset:"<<removed_offset;
+        qWarning()<<"state:";
+        for(void*object:drawables.values(GLDrawable::id())){
+            auto pair= obj_offsets.find(object);
+            qWarning()<<pair.value()<<":"<<indices[pair.value()/4]<<" "
+                        <<indices[pair.value()/4+1]<<" "
+                          <<indices[pair.value()/4+2]<<" "
+                            <<indices[pair.value()/4+3]<<" ";
+        }
+    }
+    buf.unmap();
+    buf.release();
 }
 
 template<class GLDrawable>
 void GLManager::drawAll(SceneData sdata,QOpenGLFunctions_3_3_Core*glfunc)
 {
-    ShaderBox*box = shBoxes[GLDrawable::id()];
+    ShaderBox*box = shBoxes.value(GLDrawable::id());
+    if(box)
     {
         box->shader.bind();
         vBuffer.bind();

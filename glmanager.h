@@ -51,6 +51,9 @@ public:
     void removePoint(PointCAM*);
     bool updateData(PointCAM*obj,glm::vec4 data,int offset);
 
+    //?extend to template listDrawables<GLDrawable>?
+    QList<PointCAM *> listPoints() const;
+
     template<class GLDrawable>
     void drawAll(SceneData sdata,QOpenGLFunctions_3_3_Core*);
 };

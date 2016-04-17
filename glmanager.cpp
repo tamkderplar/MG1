@@ -53,7 +53,7 @@ void GLManager::addPoint(PointCAM *p)
     int bufsize = vBuffer.size();
     v_offsets[p] = bufsize - sizeof(glm::vec4);
     vBuffer.release();
-    qWarning()<<"added vertex under"<< (v_offsets[p]/sizeof(glm::vec4));
+    //qWarning()<<"added vertex under"<< (v_offsets[p]/sizeof(glm::vec4));
 }
 
 void GLManager::removePoint(PointCAM *p)
@@ -81,4 +81,14 @@ bool GLManager::updateData(PointCAM *obj, glm::vec4 data, int offset)
                              &data,sizeof(data));
     vBuffer.release();
     return true;
+}
+
+QList<PointCAM *> GLManager::listPoints() const
+{
+    auto voidlist = drawables.values(PointCAM::id());
+    QList<PointCAM*> ret;
+    std::transform(voidlist.begin(),voidlist.end(),
+                   std::back_inserter(ret),[](void*p){return (PointCAM*)p;});
+    assert(ret.size()==voidlist.size());
+    return ret;
 }

@@ -27,6 +27,7 @@ class PointCAM : public QObject
 public:
     explicit PointCAM(GLManager *manager=0, QObject *parent=0);
     explicit PointCAM(glm::vec3 p,GLManager *manager=0, QObject *parent=0);
+    ~PointCAM();
 
     void setPos(glm::vec3);
     glm::vec4 pos() const;
@@ -52,6 +53,7 @@ public:
     static const QString FSH;
 signals:
     void pointChanged(PointCAM*);
+    void pointRemoved(PointCAM*);
 
 public slots:
 

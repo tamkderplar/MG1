@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     bufferwrap.cpp \
     bspline.cpp \
     bezier3c0.cpp \
-    linesegment.cpp
+    linesegment.cpp \
+    bsplinebasis.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
@@ -39,6 +40,7 @@ HEADERS  += mainwindow.h \
     bufferwrap.h \
     bspline.h \
     bezier3c0.h \
-    linesegment.h
+    linesegment.h \
+    bsplinebasis.h
 
 FORMS    += mainwindow.ui

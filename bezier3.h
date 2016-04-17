@@ -6,6 +6,9 @@
 class Bezier3
 {
     QList<PointCAM*> control;
+
+    static int origSize;
+    static int instanceSplit;
 public:
     Bezier3(QVector<PointCAM*> controlPoints);
 
@@ -21,9 +24,6 @@ public:
                              QOpenGLBuffer& iBuf,
                              SceneData sdata);
     static int instances(){return instanceSplit;}
-
-    static int origSize;
-    static int instanceSplit;
 
     static const QString VSH;
     static const QString GSH;
