@@ -26,7 +26,9 @@ SOURCES += main.cpp\
     bspline.cpp \
     bezier3c0.cpp \
     linesegment.cpp \
-    bsplinebasis.cpp
+    bsplinebasis.cpp \
+    bandmatrix.cpp \
+    intercurve.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
@@ -41,6 +43,8 @@ HEADERS  += mainwindow.h \
     bspline.h \
     bezier3c0.h \
     linesegment.h \
-    bsplinebasis.h
+    bsplinebasis.h \
+    bandmatrix.h \
+    intercurve.h
 
 FORMS    += mainwindow.ui
