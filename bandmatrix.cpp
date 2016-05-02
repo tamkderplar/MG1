@@ -1,9 +1,10 @@
 #include "bandmatrix.h"
 
 template<int W,int B>
-BandMatrix<W,B>::BandMatrix(int size)
+BandMatrix<W,B>::BandMatrix(int size):
+    data(QVector<float>(W*size,0.0f)),
+    N(size)
 {
-    data.resize(W*size);
 }
 
 template<int W,int B>
@@ -31,6 +32,7 @@ void BandMatrix<W,B>::set(int c, int r, float f)
     }
     if(c>=r-B && c<r-B+W){
         data[(c-r+B)+W*(r)] = f;
+        return;
     }
     throw std::logic_error("not considered situation, should not happen");
 }

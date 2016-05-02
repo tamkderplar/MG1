@@ -54,6 +54,7 @@ private:
     PointCAM* addPoint(glm::vec3);
     void addBezier3C0(const QVector<PointCAM*>&);
     void addBSpline(const QVector<PointCAM*>&);
+    void addInter(const QVector<PointCAM*>&);
     void drawScene(glm::mat4 transform,QColor c);
 
     QPoint lastpos;
@@ -61,8 +62,8 @@ private:
     float cameraPosZ;
     glm::vec4 cursorPos;
     PointCAM* grabbedPoint;
-    //int grabbed;
     int addObjType;
+    bool showPolygons;
 
 signals:
     void objectAdded(QObject *obj);
@@ -75,6 +76,7 @@ public slots:
     void setMouseMode(int mode);
     void setAddObjectType(int type);
     void changeBSplineBasis(bool bezierBasis);
+    void toggleControlPolygons(bool show);
 
 };
 

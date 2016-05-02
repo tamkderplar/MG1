@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 #include "bezier3c0.h"
 #include "bspline.h"
+#include "intercurve.h"
 #include "linesegment.h"
 
 SceneGLWidget::SceneGLWidget(QWidget *parent)
@@ -10,7 +11,7 @@ SceneGLWidget::SceneGLWidget(QWidget *parent)
     ,torus()
     ,stereo(false)
     ,cursorPos(0,0,0,1)
-    ,grabbedPoint(nullptr)//,grabbed(-1)
+    ,grabbedPoint(nullptr)
     ,addObjType(0)
 {
     cameraPosZ = 2.0f;
@@ -46,6 +47,7 @@ void SceneGLWidget::addObject(const QVector<int> &indices)
     QVector<PointCAM*> points;
     QVector<Bezier3C0*> beziers;
     QVector<BSpline*> splines;
+    QVector<InterCurve*> inters;
     switch(addObjType){
     case 0:
         addPoint(cursorPosition());
@@ -74,7 +76,7 @@ void SceneGLWidget::addObject(const QVector<int> &indices)
         }
         //selected PointCAM(s) - construct Bezier3C0
         else if (beziers.size()==0){
-            addBSpline(points);
+            addBezier3C0(points);
         }
         //selected Bezier3C0(s) and PointCAM(s) - Bezier3C0.append
         else {
@@ -120,6 +122,43 @@ void SceneGLWidget::addObject(const QVector<int> &indices)
         }
         //select BSpline(s),unable
         break;
+    case 3:
+        //ignore all but PointCAMs and InterCurve
+        for(int i=0;i<indices.size();++i){
+            if(PointCAM*p=
+                    qobject_cast<PointCAM*>(listObjects[indices[i]])){
+                points.append(p);
+            }else if(InterCurve*p=
+                     qobject_cast<InterCurve*>(listObjects[indices[i]])){
+                inters.append(p);
+            }
+        }
+        //no selection - addPoint + construct InterCurve
+        if(points.size()==0 && inters.size()==0){
+            addInter({addPoint(cursorPosition())});
+        }
+        //selected InterCurve(s) - addPoint + InterCurve.append
+        else if (points.size()==0){
+            PointCAM*point = addPoint(cursorPosition());
+            for(int i=0;i<inters.size();++i){
+                inters[i]->append(point);
+            }
+        }
+        //selected PointCAM(s) - construct InterCurve
+        else if (inters.size()==0){
+            addInter(points);
+        }
+        //selected InterCurve(s) and PointCAM(s) - InterCurve.append
+        else {
+            for(int i=0;i<inters.size();++i)
+                for(int j=0;j<points.size();++j){
+                    inters[i]->append(points[j]);
+                }
+        }
+        //select InterCurve(s),unable
+        break;
+    default:
+        break;
     }
 }
 
@@ -143,8 +182,6 @@ void SceneGLWidget::addBezier3C0(const QVector<PointCAM *> &points)
     Bezier3C0 *bezier = new Bezier3C0(points,&manager);
     bezier->setObjectName( QString("Bezier%1").arg(numbering) );
     listObjects.append(bezier);
-    //manager.addPoint(point);
-    //manager.addDrawable(point);
     emit objectAdded(bezier);
     numbering++;
 }
@@ -156,31 +193,22 @@ void SceneGLWidget::addBSpline(const QVector<PointCAM *> &points)
     BSpline *spline = new BSpline(points,&manager);
     spline->setObjectName( QString("BSpline%1").arg(numbering) );
     listObjects.append(spline);
-    //manager.addPoint(point);
-    //manager.addDrawable(point);
     emit objectAdded(spline);
     connect(this,&SceneGLWidget::bsplineBasisChanged,
             spline,&BSpline::changeBasis);
     numbering++;
 }
 
-/*void SceneGLWidget::removePoint(QString name)
+void SceneGLWidget::addInter(const QVector<PointCAM *> &points)
 {
-    grabbed = -1;
-    for(int i=0;i<listObjects.size();++i){
-        if(0 == listObjects[i]->objectName().compare(name)){
-            QObject *p = listObjects[i];
-            if(PointCAM*point=qobject_cast<PointCAM*>(p)){
-                manager.removeDrawable(point);
-                manager.removePoint(point);
-            }
-            listObjects.removeAt(i);
-            emit pointRemoved(name);
-            delete p;
-            return;
-        }
-    }
-}*/
+    assert(points.size()>0);
+    static int numbering = 1;
+    InterCurve *inter = new InterCurve(points,&manager);
+    inter->setObjectName( QString("Inter%1").arg(numbering) );
+    listObjects.append(inter);
+    emit objectAdded(inter);
+    numbering++;
+}
 
 void SceneGLWidget::removeObjectAt(int id)
 {
@@ -188,38 +216,16 @@ void SceneGLWidget::removeObjectAt(int id)
     if(PointCAM*point=qobject_cast<PointCAM*>(p)){
         manager.removeDrawable(point);
         manager.removePoint(point);
-    //}else if(Bezier3C0*bezier=qobject_cast<Bezier3C0*>(p)){
-    //    manager.removeDrawable(bezier);
-    //}else if(BSpline*spline=qobject_cast<BSpline*>(p)){
-        //manager.removeDrawable(spline);
     }
     listObjects.removeAt(id);
     emit objectRemoved(p);
-    grabbedPoint = nullptr;//grabbed = -1;
+    grabbedPoint = nullptr;
     delete p;
 }
 
-/*void SceneGLWidget::cursorGrab(QString name)
-{
-    if(0 == name.compare(QString())){
-        grabbed = -1;
-        return;
-    }
-
-    for(int i=0;i<listObjects.size();++i){
-        if(0 == listObjects[i]->objectName().compare(name)){
-            if(PointCAM*point=qobject_cast<PointCAM*>(listObjects[i])){
-                cursorPos = point->pos();
-                grabbed = i;
-                return;
-            }
-        }
-    }
-}*/
-
 void SceneGLWidget::cursorGrabAt(int id)
 {
-    grabbedPoint = nullptr;//grabbed = -1;
+    grabbedPoint = nullptr;
     if(id>=listObjects.size()){
         return;
     }
@@ -229,7 +235,6 @@ void SceneGLWidget::cursorGrabAt(int id)
             grabbedPoint = point;
         }
     }
-    //grabbed = id;
 }
 
 void SceneGLWidget::renamePoint(QString oldName, QString newName)
@@ -297,22 +302,23 @@ void SceneGLWidget::initializeGL()
     manager.init();
 
     //hardcode-add some points
-    addPoint({0.5,0,0});
+    /*addPoint({0.5,0,0});
     addPoint({-0.5,0,0});
     addPoint({0,0.5,0});
-    addPoint({0,-0.5,0});
+    addPoint({0,-0.5,0});*/
 
     /*manager.addDrawable(new BSplineBasis({(PointCAM*)listObjects[0],
                                      (PointCAM*)listObjects[2],
                                      (PointCAM*)listObjects[1],
                                      (PointCAM*)listObjects[3]}));*/
-    addBSpline({   (PointCAM*)listObjects[0],(PointCAM*)listObjects[2],
+    /*addBSpline({   (PointCAM*)listObjects[0],(PointCAM*)listObjects[2],
                    (PointCAM*)listObjects[1],(PointCAM*)listObjects[3],
                    (PointCAM*)listObjects[0],(PointCAM*)listObjects[2],
                    (PointCAM*)listObjects[1]
-                   });
+                   });*/
 
-    /*int result = -1;
+    //*
+    int result = -1;
     glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS,&result);
     qWarning() << "GL_MAX_TRANSFORM_FEEDBACK_BUFFERS:" << result;
     result = -1;
@@ -338,7 +344,11 @@ void SceneGLWidget::initializeGL()
     result = -1;
     glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS,&result);
     qWarning() << "GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS:"
-               << result;*/
+               << result;
+    result = -1;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&result);
+    qWarning() << "GL_MAX_VERTEX_ATTRIBS:"
+               << result;//*/
 }
 
 void SceneGLWidget::resizeGL(int w, int h)
@@ -418,8 +428,10 @@ void SceneGLWidget::drawScene(glm::mat4 viewMat, QColor c)
     pointsShader.release();*/
 
     manager.drawAll<PointCAM>({worldMat,viewMat,c,cameraPosZ},this);
+    if(showPolygons){
+        manager.drawAll<LineSegment>({worldMat,viewMat,c,cameraPosZ},this);
+    }
     manager.drawAll<Bezier3>({worldMat,viewMat,c,cameraPosZ},this);
-    manager.drawAll<LineSegment>({worldMat,viewMat,c,cameraPosZ},this);
     manager.drawAll<BSplineBasis>({worldMat,viewMat,c,cameraPosZ},this);
 }
 
@@ -459,7 +471,6 @@ void SceneGLWidget::setMouseMode(int mode)
                     glm::vec4(glm::vec3{dir.x,-dir.y,-dir.z}/400.0f,0);
             cursorPos += moveVec;
             if(manager.listPoints().contains(grabbedPoint)){
-            //if(nullptr != grabbedPoint){
                 grabbedPoint->setPos(glm::vec3(grabbedPoint->pos() + moveVec));
             }
         };
@@ -473,9 +484,6 @@ void SceneGLWidget::setMouseMode(int mode)
             auto list = manager.listPoints();
             for(int i=0; i<list.size();++i){
                 PointCAM*point = list[i];
-                /*if(!(point=qobject_cast<PointCAM*>(list[i]))){
-                    continue;
-                }*/
                 glm::vec4 perspP = m * point->pos();
                 if(perspP.z >= cameraPosZ){
                     continue;
@@ -485,7 +493,7 @@ void SceneGLWidget::setMouseMode(int mode)
                 if( (perspP.x-x)*(perspP.x-x) + (perspP.y-y)*(perspP.y-y)
                         < 0.03*0.03){
                     cursorPos = point->pos();
-                    grabbedPoint = point;//grabbed = i;
+                    grabbedPoint = point;
                     return;
                 }
             }
@@ -504,4 +512,10 @@ void SceneGLWidget::setAddObjectType(int type)
 void SceneGLWidget::changeBSplineBasis(bool bezierBasis)
 {
     emit bsplineBasisChanged(bezierBasis);
+}
+
+void SceneGLWidget::toggleControlPolygons(bool show)
+{
+    showPolygons = show;
+    update();
 }

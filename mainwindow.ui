@@ -70,6 +70,11 @@
            <string>C2</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>Inter</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
@@ -83,6 +88,13 @@
         <widget class="QCheckBox" name="cb_stereo">
          <property name="text">
           <string>Stereo</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cb_ctrlPoly">
+         <property name="text">
+          <string>Ctrl Polygons</string>
          </property>
         </widget>
        </item>
@@ -137,7 +149,7 @@
           <item>
            <widget class="QListWidget" name="listWidget">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -404,9 +416,27 @@
    <slots>
     <signal>pointAdded(QString)</signal>
     <signal>cursorPositionChanged(glm::vec3,glm::vec2)</signal>
+    <slot>toggleControlPolygons(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cb_ctrlPoly</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>widgetScene</receiver>
+   <slot>toggleControlPolygons(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>366</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>344</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

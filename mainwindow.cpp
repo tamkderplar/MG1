@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     findChild<SceneGLWidget*>()->addPoint({-0.5,0,0});
     findChild<SceneGLWidget*>()->addPoint({0,0.5,0});
     findChild<SceneGLWidget*>()->addPoint({0,-0.5,0});*/
+    findChild<QListView*>("listView")->hide();
 }
 
 MainWindow::~MainWindow()
@@ -43,13 +44,16 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
         findChild<QComboBox*>("cb_mode")->setCurrentIndex(4);
         break;
     case Qt::Key_Q:
-        findChild<QComboBox*>("cb_mode")->setCurrentIndex(0);
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(0);
         break;
     case Qt::Key_W:
-        findChild<QComboBox*>("cb_mode")->setCurrentIndex(1);
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(1);
         break;
     case Qt::Key_E:
-        findChild<QComboBox*>("cb_mode")->setCurrentIndex(2);
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(2);
+        break;
+    case Qt::Key_R:
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(3);
         break;
     case Qt::Key_A:
         findChild<QPushButton*>("pb_AddObject")->animateClick();
