@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>663</width>
-    <height>519</height>
+    <width>673</width>
+    <height>655</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,6 +73,11 @@
          <item>
           <property name="text">
            <string>Inter</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>PatchC0</string>
           </property>
          </item>
         </widget>
@@ -281,58 +286,39 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>patch wrap</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QWidget" name="widget_4" native="true">
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_torusnR">
+             <property name="leftMargin">
+              <number>9</number>
+             </property>
+             <item row="2" column="4">
+              <widget class="QSpinBox" name="sb_patchM">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="3">
+              <widget class="QLabel" name="label_patchM">
                <property name="text">
-                <string>nR:</string>
+                <string>M:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="sb_torusnR">
-               <property name="minimum">
-                <number>3</number>
-               </property>
-               <property name="maximum">
-                <number>999</number>
-               </property>
-               <property name="value">
-                <number>8</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QLabel" name="label_torusnr">
-               <property name="text">
-                <string>nr:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QSpinBox" name="sb_torusnr">
-               <property name="minimum">
-                <number>3</number>
-               </property>
-               <property name="maximum">
-                <number>999</number>
-               </property>
-               <property name="value">
-                <number>8</number>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_torusR">
+              <widget class="QLabel" name="label_patchUDiv">
                <property name="text">
-                <string>R:</string>
+                <string>udiv:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -340,7 +326,53 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="dsb_torusR">
+              <widget class="QSpinBox" name="sb_patchUDiv">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="value">
+                <number>4</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QLabel" name="label_patchVDiv">
+               <property name="text">
+                <string>vdiv:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QSpinBox" name="sb_patchVDiv">
+               <property name="minimum">
+                <number>0</number>
+               </property>
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="value">
+                <number>4</number>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_patchRW">
+               <property name="text">
+                <string>R/W:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="dsb_patchRW">
                <property name="minimum">
                 <double>0.010000000000000</double>
                </property>
@@ -348,22 +380,22 @@
                 <double>0.100000000000000</double>
                </property>
                <property name="value">
-                <double>1.000000000000000</double>
+                <double>0.500000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
-              <widget class="QLabel" name="label_torusr">
+             <item row="3" column="3">
+              <widget class="QLabel" name="label_patchLH">
                <property name="text">
-                <string>r:</string>
+                <string>L/H:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
-             <item row="1" column="3">
-              <widget class="QDoubleSpinBox" name="dsb_torusr">
+             <item row="3" column="4">
+              <widget class="QDoubleSpinBox" name="dsb_patchLH">
                <property name="minimum">
                 <double>0.010000000000000</double>
                </property>
@@ -372,6 +404,23 @@
                </property>
                <property name="value">
                 <double>0.300000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_patchN">
+               <property name="text">
+                <string>N:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="sb_patchN">
+               <property name="minimum">
+                <number>1</number>
                </property>
               </widget>
              </item>
@@ -391,8 +440,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>663</width>
-     <height>22</height>
+     <width>673</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
@@ -417,6 +466,7 @@
     <signal>pointAdded(QString)</signal>
     <signal>cursorPositionChanged(glm::vec3,glm::vec2)</signal>
     <slot>toggleControlPolygons(bool)</slot>
+    <slot>togglePatchWrap(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -429,12 +479,28 @@
    <slot>toggleControlPolygons(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>366</x>
-     <y>65</y>
+     <x>503</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
      <x>344</x>
      <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>widgetScene</receiver>
+   <slot>togglePatchWrap(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>482</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>352</x>
+     <y>471</y>
     </hint>
    </hints>
   </connection>

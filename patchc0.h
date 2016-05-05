@@ -22,12 +22,12 @@ class PatchC0 : public QObject
 public:
     explicit PatchC0(glm::vec4,int,int,bool,float,float,GLManager*, QObject *parent = 0);
     ~PatchC0();
-    void updateRibsChanged(int,int);
     void updateChanged(PointCAM*);
 
 signals:
 
 public slots:
+    void updateRibsChanged(int,int);
 
 };
 

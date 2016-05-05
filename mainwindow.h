@@ -43,6 +43,18 @@ private slots:
     void on_dsb_torusR_valueChanged(double arg1);
     void on_dsb_torusr_valueChanged(double arg1);
 
+    void on_sb_patchUDiv_valueChanged(int arg1);
+
+    void on_sb_patchVDiv_valueChanged(int arg1);
+
+    void on_sb_patchN_valueChanged(int arg1);
+
+    void on_sb_patchM_valueChanged(int arg1);
+
+    void on_dsb_patchRW_valueChanged(double arg1);
+
+    void on_dsb_patchLH_valueChanged(double arg1);
+
 private:
     Ui::MainWindow *ui;
 };

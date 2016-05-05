@@ -1,4 +1,4 @@
-#ifndef SCENEGLWIDGET_H
+﻿#ifndef SCENEGLWIDGET_H
 #define SCENEGLWIDGET_H
 
 #include <QOpenGLWidget>
@@ -55,6 +55,7 @@ private:
     void addBezier3C0(const QVector<PointCAM*>&);
     void addBSpline(const QVector<PointCAM*>&);
     void addInter(const QVector<PointCAM*>&);
+    void addPatchC0();
     void drawScene(glm::mat4 transform,QColor c);
 
     QPoint lastpos;
@@ -64,12 +65,17 @@ private:
     PointCAM* grabbedPoint;
     int addObjType;
     bool showPolygons;
+    //patch options
+    int patch_n,patch_m;
+    bool patch_wrap;
+    float patch_width,patch_height;
 
 signals:
     void objectAdded(QObject *obj);
     void objectRemoved(QObject *obj);
     void cursorPositionChanged(glm::vec3,glm::vec2);
     void bsplineBasisChanged(bool bezierBasis);
+    void patchDivisionChanged(int,int);
 
 
 public slots:
@@ -77,6 +83,10 @@ public slots:
     void setAddObjectType(int type);
     void changeBSplineBasis(bool bezierBasis);
     void toggleControlPolygons(bool show);
+    void changePatchDivision(int,int);
+    void setPatchNM(int,int);
+    void togglePatchWrap(bool);
+    void setPatchSize(float,float);
 
 };
 

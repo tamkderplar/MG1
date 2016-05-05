@@ -4,6 +4,7 @@
 #include "bezier3c0.h"
 #include "bspline.h"
 #include "intercurve.h"
+#include "patchc0.h"
 #include "linesegment.h"
 
 SceneGLWidget::SceneGLWidget(QWidget *parent)
@@ -157,6 +158,9 @@ void SceneGLWidget::addObject(const QVector<int> &indices)
         }
         //select InterCurve(s),unable
         break;
+    case 4:
+        addPatchC0();
+        break;
     default:
         break;
     }
@@ -207,6 +211,19 @@ void SceneGLWidget::addInter(const QVector<PointCAM *> &points)
     inter->setObjectName( QString("Inter%1").arg(numbering) );
     listObjects.append(inter);
     emit objectAdded(inter);
+    numbering++;
+}
+
+void SceneGLWidget::addPatchC0()
+{
+    static int numbering = 1;
+    PatchC0 *patch = new PatchC0(cursorPos,patch_n,patch_m,patch_wrap,
+                                 patch_width,patch_height,&manager);
+    patch->setObjectName( QString("PatchBezier%1").arg(numbering) );
+    listObjects.append(patch);
+    emit objectAdded(patch);
+    connect(this,&SceneGLWidget::patchDivisionChanged,
+            patch,&PatchC0::updateRibsChanged);
     numbering++;
 }
 
@@ -518,4 +535,26 @@ void SceneGLWidget::toggleControlPolygons(bool show)
 {
     showPolygons = show;
     update();
+}
+
+void SceneGLWidget::changePatchDivision(int udiv, int vdiv)
+{
+    emit patchDivisionChanged(udiv,vdiv);
+}
+
+void SceneGLWidget::setPatchNM(int n,int m)
+{
+    patch_n = n;
+    patch_m = m;
+}
+
+void SceneGLWidget::togglePatchWrap(bool wrap)
+{
+    patch_wrap = wrap;
+}
+
+void SceneGLWidget::setPatchSize(float w, float h)
+{
+    patch_width = w;
+    patch_height = h;
 }

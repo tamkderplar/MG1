@@ -55,6 +55,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     case Qt::Key_R:
         findChild<QComboBox*>("cb_type")->setCurrentIndex(3);
         break;
+    case Qt::Key_T:
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(4);
+        break;
     case Qt::Key_A:
         findChild<QPushButton*>("pb_AddObject")->animateClick();
         break;
@@ -205,5 +208,47 @@ void MainWindow::on_widgetScene_cursorPositionChanged(const glm::vec3 &pos3, con
 void MainWindow::on_cb_spline_clicked(bool checked)
 {
     findChild<SceneGLWidget*>()->changeBSplineBasis(checked);
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_sb_patchUDiv_valueChanged(int arg1)
+{
+    findChild<SceneGLWidget*>()->changePatchDivision(arg1,
+                                    findChild<QSpinBox*>("sb_patchVDiv")->value());
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_sb_patchVDiv_valueChanged(int arg1)
+{
+    findChild<SceneGLWidget*>()->changePatchDivision(
+                                    findChild<QSpinBox*>("sb_patchUDiv")->value(),arg1);
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_sb_patchN_valueChanged(int arg1)
+{
+    findChild<SceneGLWidget*>()->setPatchNM(arg1,
+                                    findChild<QSpinBox*>("sb_patchM")->value());
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_sb_patchM_valueChanged(int arg1)
+{
+    findChild<SceneGLWidget*>()->setPatchNM(
+                                    findChild<QSpinBox*>("sb_patchN")->value(),arg1);
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_dsb_patchRW_valueChanged(double arg1)
+{
+    findChild<SceneGLWidget*>()->setPatchSize(arg1,
+                                    findChild<QDoubleSpinBox*>("dsb_patchLH")->value());
+    findChild<SceneGLWidget*>()->update();
+}
+
+void MainWindow::on_dsb_patchLH_valueChanged(double arg1)
+{
+    findChild<SceneGLWidget*>()->setPatchSize(
+                                    findChild<QDoubleSpinBox*>("dsb_patchRW")->value(),arg1);
     findChild<SceneGLWidget*>()->update();
 }
