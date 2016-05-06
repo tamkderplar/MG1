@@ -19,6 +19,10 @@ SceneGLWidget::SceneGLWidget(QWidget *parent)
     perspMat[2][2] = 0;
     perspMat[2][3] = -1/cameraPosZ;
     setMouseMode(0);
+    patch_m=patch_n=1;
+    patch_width=0.5;
+    patch_height=0.3;
+    patch_wrap=false;
 }
 
 void SceneGLWidget::updateTorus()
@@ -222,6 +226,7 @@ void SceneGLWidget::addPatchC0()
     patch->setObjectName( QString("PatchBezier%1").arg(numbering) );
     listObjects.append(patch);
     emit objectAdded(patch);
+    patch->updateRibsChanged(4,4);
     connect(this,&SceneGLWidget::patchDivisionChanged,
             patch,&PatchC0::updateRibsChanged);
     numbering++;
@@ -333,6 +338,16 @@ void SceneGLWidget::initializeGL()
                    (PointCAM*)listObjects[0],(PointCAM*)listObjects[2],
                    (PointCAM*)listObjects[1]
                    });*/
+    //addPatchC0();
+    /*auto p =new PatchC0(glm::vec4(0,0,0,1),1,1,false,0.7,0.7,&manager);
+    p->updateRibsChanged(1,1);
+    p->updateRibsChanged(2,1);
+    p->updateRibsChanged(3,1);
+    p->updateRibsChanged(4,1);
+    p->updateRibsChanged(5,1);
+    p->updateRibsChanged(6,1);
+    p->updateRibsChanged(5,1);
+    p->updateRibsChanged(4,1);*/
 
     //*
     int result = -1;
@@ -446,7 +461,7 @@ void SceneGLWidget::drawScene(glm::mat4 viewMat, QColor c)
 
     manager.drawAll<PointCAM>({worldMat,viewMat,c,cameraPosZ},this);
     if(showPolygons){
-        manager.drawAll<LineSegment>({worldMat,viewMat,c,cameraPosZ},this);
+        manager.drawAll<LineSegment>({worldMat,viewMat,(c==qRgba(255,255,255,100)?Qt::green:c),cameraPosZ},this);
     }
     manager.drawAll<Bezier3>({worldMat,viewMat,c,cameraPosZ},this);
     manager.drawAll<BSplineBasis>({worldMat,viewMat,c,cameraPosZ},this);

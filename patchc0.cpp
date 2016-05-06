@@ -118,6 +118,10 @@ void PatchC0::updateChanged(PointCAM *)
 
 void PatchC0::updateRibsChanged(int udiv, int vdiv)
 {
+    for(int i=0;i<control.size();++i){
+        disconnect(qobject_cast<PointCAM*>(control[i]),0,0,0);
+        qobject_cast<PointCAM*>(control[i])->disconnect();
+    }
     for(int i=const_ribs;i<segments.size();++i){
         man->removeDrawable(segments[i]);
         //internal ribs own their points
@@ -146,7 +150,7 @@ void PatchC0::updateRibsChanged(int udiv, int vdiv)
                                        },man);
                     man->addPoint(ps[l]);
                     auto p =ps[l];
-                    auto update=[this,b0,b1,b2,b3,p,i,j,l](PointCAM*){
+                    auto update=[this,b0,b1,b2,b3,i,j,l,p](PointCAM*){
                         p->setPos(glm::vec3{
                                       control[3*i*points_v+3*j+l]->pos()*b0+
                                       control[(3*i+1)*points_v+3*j+l]->pos()*b1+
@@ -181,7 +185,7 @@ void PatchC0::updateRibsChanged(int udiv, int vdiv)
                                        },man);
                     man->addPoint(ps[l]);
                     auto p =ps[l];
-                    auto update=[this,b0,b1,b2,b3,p,i,j,l](PointCAM*){
+                    auto update=[this,b0,b1,b2,b3,i,j,l,p](PointCAM*){
                         p->setPos(glm::vec3{
                                       control[(3*i+l)*points_v+3*j]->pos()*b0+
                                       control[(3*i+l)*points_v+3*j+1]->pos()*b1+
