@@ -1,12 +1,12 @@
-#ifndef PATCHC0_H
-#define PATCHC0_H
+#ifndef PATCHC2_H
+#define PATCHC2_H
 
 #include <QObject>
 #include "pointcam.h"
-#include "bezier3.h"
+#include "bsplinebasis.h"
 #include "linesegment.h"
 
-class PatchC0 : public QObject
+class PatchC2 : public QObject
 {
     Q_OBJECT
 
@@ -16,12 +16,12 @@ class PatchC0 : public QObject
     int ribs_u,ribs_v;//ribs count, needed in updating
     int const_ribs;
     QList<PointCAM*> control;
-    QVector<Bezier3*> segments;
+    QVector<BSplineBasis*> segments;
     QList<LineSegment*> controlPolygon;
     GLManager*man;
 public:
-    explicit PatchC0(glm::vec4,int,int,bool,float,float,GLManager*, QObject *parent = 0);
-    ~PatchC0();
+    explicit PatchC2(glm::vec4,int,int,bool,float,float,GLManager*, QObject *parent = 0);
+    ~PatchC2();
     void updateChanged(PointCAM*);
 
 signals:
@@ -31,4 +31,4 @@ public slots:
 
 };
 
-#endif // PATCHC0_H
+#endif // PATCHC2_H

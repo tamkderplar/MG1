@@ -56,6 +56,7 @@ private:
     void addBSpline(const QVector<PointCAM*>&);
     void addInter(const QVector<PointCAM*>&);
     void addPatchC0();
+    void addPatchC2();
     void drawScene(glm::mat4 transform,QColor c);
 
     QPoint lastpos;

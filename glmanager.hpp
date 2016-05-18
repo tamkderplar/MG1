@@ -63,7 +63,7 @@ void GLManager::addDrawable(GLDrawable *obj)
     }
     shBoxes[ID]->iBufCount++;
     //debug
-    if(ID==1){
+    /*if(ID==1){
         int*indices=(int*)iBuf.map(QOpenGLBuffer::ReadWrite);
         qWarning()<<"added Bezier at offset:"<<writeOffset;
         qWarning()<<"state:";
@@ -75,7 +75,7 @@ void GLManager::addDrawable(GLDrawable *obj)
                             <<indices[pair.value()/4+3]<<" ";
         }
         iBuf.unmap();
-    }
+    }*/
     iBuf.release();
 }
 
@@ -113,7 +113,7 @@ void GLManager::removeDrawable(GLDrawable *obj)
 
     drawables.remove(GLDrawable::id(),obj);
 
-    if(ID==1){
+    /*if(ID==1){
         qWarning()<<"removed Bezier at offset:"<<removed_offset;
         qWarning()<<"state:";
         for(void*object:drawables.values(GLDrawable::id())){
@@ -123,7 +123,7 @@ void GLManager::removeDrawable(GLDrawable *obj)
                           <<indices[pair.value()/4+2]<<" "
                             <<indices[pair.value()/4+3]<<" ";
         }
-    }
+    }*/
     buf.unmap();
     buf.release();
 }

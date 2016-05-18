@@ -5,6 +5,7 @@
 #include "bspline.h"
 #include "intercurve.h"
 #include "patchc0.h"
+#include "patchc2.h"
 #include "linesegment.h"
 
 SceneGLWidget::SceneGLWidget(QWidget *parent)
@@ -165,6 +166,9 @@ void SceneGLWidget::addObject(const QVector<int> &indices)
     case 4:
         addPatchC0();
         break;
+    case 5:
+        addPatchC2();
+        break;
     default:
         break;
     }
@@ -229,6 +233,20 @@ void SceneGLWidget::addPatchC0()
     patch->updateRibsChanged(4,4);
     connect(this,&SceneGLWidget::patchDivisionChanged,
             patch,&PatchC0::updateRibsChanged);
+    numbering++;
+}
+
+void SceneGLWidget::addPatchC2()
+{
+    static int numbering = 1;
+    PatchC2 *patch = new PatchC2(cursorPos,patch_n,patch_m,patch_wrap,
+                                 patch_width,patch_height,&manager);
+    patch->setObjectName( QString("PatchSpline%1").arg(numbering) );
+    listObjects.append(patch);
+    emit objectAdded(patch);
+    patch->updateRibsChanged(4,4);
+    connect(this,&SceneGLWidget::patchDivisionChanged,
+            patch,&PatchC2::updateRibsChanged);
     numbering++;
 }
 

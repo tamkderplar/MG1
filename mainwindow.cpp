@@ -58,6 +58,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     case Qt::Key_T:
         findChild<QComboBox*>("cb_type")->setCurrentIndex(4);
         break;
+    case Qt::Key_Y:
+        findChild<QComboBox*>("cb_type")->setCurrentIndex(5);
+        break;
     case Qt::Key_A:
         findChild<QPushButton*>("pb_AddObject")->animateClick();
         break;

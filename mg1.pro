@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     bsplinebasis.cpp \
     bandmatrix.cpp \
     intercurve.cpp \
-    patchc0.cpp
+    patchc0.cpp \
+    patchc2.cpp
 
 HEADERS  += mainwindow.h \
     sceneglwidget.h \
@@ -47,6 +48,7 @@ HEADERS  += mainwindow.h \
     bsplinebasis.h \
     bandmatrix.h \
     intercurve.h \
-    patchc0.h
+    patchc0.h \
+    patchc2.h
 
 FORMS    += mainwindow.ui
